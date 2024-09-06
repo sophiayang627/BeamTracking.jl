@@ -5,7 +5,7 @@
 [![Build Status](https://github.com/bmad-sim/BeamTracking.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/bmad-sim/BeamTracking.jl/actions/workflows/CI.yml?query=branch%3Amain)
 
 
-To develop this package, you will need [`AcceleratorLattice.jl`](https://github.com/bmad-sim/AcceleratorLattice.jl) and [`AtomicAndPhysicalConstants.jl`](https://github.com/bmad-sim/AtomicAndPhysicalConstants.jl), which is not yet on the official Julia registry. Therefore in the Julia REPL run:
+To develop this package, you will need [`AcceleratorLattice.jl`](https://github.com/bmad-sim/AcceleratorLattice.jl) and [`AtomicAndPhysicalConstants.jl`](https://github.com/bmad-sim/AtomicAndPhysicalConstants.jl), which are not yet on the official Julia registry. Therefore in the Julia REPL run:
 
 ```julia
 import Pkg;
@@ -16,7 +16,7 @@ Pkg.develop(url="https://github.com/bmad-sim/BeamTracking.jl.git");       # This
 
 If working on your own fork, replace `bmad-sim` in the above `develop` url with your Github username.
 
-In your `~/.julia/dev/` directory, you will now see the directories `AcceleratorLattice` and `BeamTracking`. Both of these are Github repos where you can do your work and push changes.
+In your `~/.julia/dev/` directory, you will now see the directory `BeamTracking`. This is the Github repo where you can do your work and push changes.
 
 If you would like to add a dependency to the project (e.g. [`OrdinaryDiffEq.jl`](https://github.com/SciML/OrdinaryDiffEq.jl)), you should:
 
