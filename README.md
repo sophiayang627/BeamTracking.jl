@@ -9,9 +9,9 @@ To develop this package, you will need [`AcceleratorLattice.jl`](https://github.
 
 ```julia
 import Pkg;
-Pkg.add(url="https://github.com/bmad-sim/AcceleratorLattice.jl.git");     # Dependency
-Pkg.add(url="https://github.com/bmad-sim/AtomicAndPhysicalConstants.jl.git"); # Dependency
-Pkg.develop(url="https://github.com/bmad-sim/BeamTracking.jl.git");       # This package! Replace bmad-sim with your username if working on a fork
+Pkg.develop(url="https://github.com/bmad-sim/AcceleratorLattice.jl.git");         # Dependency
+Pkg.develop(url="https://github.com/bmad-sim/AtomicAndPhysicalConstants.jl.git"); # Dependency
+Pkg.develop(url="https://github.com/bmad-sim/BeamTracking.jl.git"); # This package! Replace bmad-sim with your username if working on a fork
 ```
 
 If working on your own fork, replace `bmad-sim` in the above `develop` url with your Github username.
