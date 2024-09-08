@@ -1,13 +1,29 @@
+module Paraxial
+using ..BeamTracking: Coords, Beam, Coord, Particle
+using ..GTPSA
+using ..AcceleratorLattice
+
 """
-Example routine to track through a drift using the paraxial approximation 
-and including higher order energy effects. This function can be used both 
-for SoA tracking (where `beamf` and `beam0` are the `Beam` struct), and 
-also AoS tracking (where `beamf` and `beam0` are just ordinary vectors).
+    track!(ele::Drift, statef::T, state0::T) where {T <: Union{Beam,Particle}} -> statef
+
+Routine to tracking through a drift using the paraial approximation and 
+including higher-order energy effects. This function can be used both for 
+a single `Particle`, or for a `Beam`.
+
+For SoA tracking, the `Beam` struct should be used, and for `AoS` tracking, 
+where `statef` and `state0` are `Vector{Particle{T}}` one can do 
+`track!.(ele, statef, state0)` using the dot (`.`) to broadcast.
+
+### Arguments
+- `ele`    -- `Drift` type element
+- `statef` -- Output state after tracking through, may be either a `Particle` or a `Beam`
+- `state0` -- Input state before tracking through, may be either a `Particle` or a `Beam`
 """
-function track!(drift::Drift, beamf, beam0)
-  @assert !(beamf === beam0) "Aliasing beamf === beam0 not allowed!"
-  
-  L = drift.L
+function track!(ele::Drift, statef::T, state0::T) where {T <: Union{Beam,Particle}}
+  @assert !(statef === state0) "Aliasing statef === state0 not allowed!"
+  L = ele.L
+  z0 = state0.z
+  zf = statef.z
 
   @FastGTPSA begin
   @. zf[1] = z0[1]+z0[2]*L/(1.0+z0[6])
@@ -17,5 +33,7 @@ function track!(drift::Drift, beamf, beam0)
   @. zf[5] = z0[5]-L*((z0[2]^2)+(z0[4]^2))/(1.0+z0[6])^2/2.0
   @. zf[6] = z0[6] 
   end
-  return zf
+  return statef
+end
+
 end

@@ -4,16 +4,17 @@ using AcceleratorLattice,
       ReferenceFrameRotations,
       StaticArrays
 
-# Temporary until AtomicAndPhysicalConstants is cleaned up ====
+# Temporary until AtomicAndPhysicalConstants is cleaned up ----
 import AtomicAndPhysicalConstants: AtomicAndPhysicalConstants
 const Species = AtomicAndPhysicalConstants.Particle
-# =============================================================
+# -------------------------------------------------------------
 
 export Beam, 
        Symplectic,
        Paraxial
 
-struct Beam{T} <: FieldVector{6, T}
+# SoA ----------------------------------
+struct Coords{T} <: FieldVector{6, T}
   x::Vector{T}
   px::Vector{T}
   y::Vector{T}
@@ -22,20 +23,31 @@ struct Beam{T} <: FieldVector{6, T}
   pz::Vector{T}
 end
 
-# Modules fully separated:
+struct Beam{T} # Must agree exactly with `Particle`!
+  species::Species
+  z::Coords{T}
+end
+# --------------------------------------
 
-module Symplectic
-using ..BeamTracking: Beam
-using ..GTPSA
-using ..AcceleratorLattice
-include("symplectic/symplectic.jl") # If more files added, add more includes here!
+# AoS ----------------------------------
+struct Coord{T} <: FieldVector{6, T}
+  x::T
+  px::T
+  y::T
+  py::T
+  z::T
+  pz::T
 end
 
-module Paraxial
-using ..BeamTracking: Beam
-using ..GTPSA
-using ..AcceleratorLattice
-include("paraxial/paraxial.jl")     # If more files added, add more includes here!
+struct Particle{T} # Must agree exactly with `Beam`!
+  species::Species
+  z::Coord{T}      
 end
+# ---------------------------------------
+
+
+# Modules separated:
+include("symplectic/Symplectic.jl") 
+include("paraxial/Paraxial.jl")    
 
 end
