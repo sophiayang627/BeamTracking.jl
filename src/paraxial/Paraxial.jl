@@ -19,9 +19,9 @@ where `statef` and `state0` are `Vector{Particle{T}}` one can do
 - `statef` -- Output state after tracking through, may be either a `Particle` or a `Beam`
 - `state0` -- Input state before tracking through, may be either a `Particle` or a `Beam`
 """
-function track!(ele::Drift, statef::T, state0::T) where {T <: Union{Beam,Particle}}
+function track!(L, statef::Beam{T}, state0::Beam{T}) where {T}
   @assert !(statef === state0) "Aliasing statef === state0 not allowed!"
-  L = ele.L
+  #L = 5
   z0 = state0.z
   zf = statef.z
 
@@ -34,6 +34,21 @@ function track!(ele::Drift, statef::T, state0::T) where {T <: Union{Beam,Particl
   @. zf[6] = z0[6] 
   end
   return statef
+end
+
+function track_one(L, state0::Particle)
+  #L = ele.L
+  z0 = state0.z
+
+  @FastGTPSA begin
+  x  = z0[1]+z0[2]*L/(1.0+z0[6])
+  px = z0[2]
+  y  = z0[3]+z0[4]*L/(1.0+z0[6])
+  py = z0[4]
+  z  = z0[5]-L*((z0[2]^2)+(z0[4]^2))/(1.0+z0[6])^2/2.0
+  pz = z0[6] 
+  end
+  return Particle(state0.species, Coord(x,px,y,py,z,pz))
 end
 
 end
