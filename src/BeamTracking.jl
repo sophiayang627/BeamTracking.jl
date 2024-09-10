@@ -44,7 +44,7 @@ function Coords(
   return Coords(x, px, y, py, z, pz)
 end
 
-struct Beam{T} # Must agree exactly with `Particle`!
+struct Beam{T}
   species::Species
   z::Coords{T}
 end
@@ -62,50 +62,6 @@ function Beam(
 end
 
 # --------------------------------------
-
-# AoS ----------------------------------
-struct Coord{T} <: FieldVector{6, T}
-  x::T
-  px::T
-  y::T
-  py::T
-  z::T
-  pz::T
-end
-
-function Coord(;
-  d_x::Distribution=Normal(0,0), d_px::Distribution=Normal(0,0), 
-  d_y::Distribution=Normal(0,0), d_py::Distribution=Normal(0,0), 
-  d_z::Distribution=Normal(0,0), d_pz::Distribution=Normal(0,0)
-)
-  x  = rand(d_x )
-  px = rand(d_px)
-  y  = rand(d_y )
-  py = rand(d_py)
-  z  = rand(d_z )
-  pz = rand(d_pz)
-
-  return Coord(x, px, y, py, z, pz)
-end
-
-struct Particle{T} # Must agree exactly with `Beam`!
-  species::Species
-  z::Coord{T}      
-end
-
-function Particle(;
-  species::Species=Species("electron"),
-  d_x::Distribution=Normal(0,0), d_px::Distribution=Normal(0,0), 
-  d_y::Distribution=Normal(0,0), d_py::Distribution=Normal(0,0), 
-  d_z::Distribution=Normal(0,0), d_pz::Distribution=Normal(0,0)
-)
-
-  coord = Coord(d_x=d_x, d_px=d_px, d_y=d_y, d_py=d_py, d_z=d_z, d_pz=d_pz)
-
-  return Particle(species, coord)
-end
-
-# ---------------------------------------
 
 
 # Modules separated:
