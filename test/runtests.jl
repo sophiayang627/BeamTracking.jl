@@ -1,5 +1,5 @@
 using BeamTracking
-using Test
+using Test, Distributions
 
 @testset "BeamTracking.jl" begin
     beam0 = Beam(10000, d_x=Normal(0, 1e-3), d_px=Normal(0, 1e-4), d_pz=Normal(0, 1e-2))
