@@ -4,18 +4,17 @@ using ..GTPSA
 using ..AcceleratorLattice
 
 """
-`track!(ele::Drift, statef::T, state0::T) where {T <: Union{Beam,Particle}} -> statef`
+    track!(ele::Drift, statef::Beam, state0::Beam) -> statef
 
-This function performs exact, hence symplectic, tracking of either
-a `Particle` or a `Beam` through a drift.
+This function performs exact, hence symplectic, tracking of a `Beam` through a drift.
 
 ### Arguments
   - `ele`    -- `Drift`-type element
-  - `statef` -- Output state, may be either a `Particle` or a `Beam`
-  - `state0` -- Input state, may be either a `Particle` or a `Beam`
-""" track
+  - `statef` -- Output `Beam`
+  - `state0` -- Input `Beam`
+""" track!
 
-function track!(ele::Drift, statef::T, state0::T) where {T <: Union{Beam,Particle}}
+function track!(ele::Drift, statef::Beam, state0::Beam)
   @assert !(statef === state0) "Aliasing statef === state0 not allowed!"
   L = ele.L
   z0 = state0.z
