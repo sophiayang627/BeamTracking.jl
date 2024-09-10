@@ -12,8 +12,6 @@ const Species = AtomicAndPhysicalConstants.Particle
 
 export Beam,
        Coords,
-       Coord,
-       Particle,
        Symplectic,
        Paraxial,
        Species

@@ -1,5 +1,5 @@
 module Symplectic
-using ..BeamTracking: Coords, Beam, Coord, Particle
+using ..BeamTracking: Coords, Beam
 using ..GTPSA
 using ..AcceleratorLattice
 
