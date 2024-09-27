@@ -3,7 +3,7 @@ using AcceleratorLattice
 using Test
 
 # define elements
-@ele start = BeginningEle(pc_ref = 10.e6, species_ref = species("electron"));
+@ele start = BeginningEle(pc_ref = 10.e6, species_ref = Species("electron"));
 @ele d1 = Drift(L = 2.);
 
 # define beamlines
