@@ -5,11 +5,6 @@ using AcceleratorLattice,
       StaticArrays,
       Distributions
 
-# Temporary until AtomicAndPhysicalConstants is cleaned up ----
-import AtomicAndPhysicalConstants: AtomicAndPhysicalConstants
-const Species = AtomicAndPhysicalConstants.Particle
-# -------------------------------------------------------------
-
 export Beam,
        Coords,
        Symplectic,
