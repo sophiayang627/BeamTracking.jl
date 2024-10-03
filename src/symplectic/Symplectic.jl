@@ -22,6 +22,9 @@ function track!(ele::Drift, statef::Beam, statei::Beam)
   zi = statei.z
   zf = statef.z
 
+  tilde_m = massof(ele.species_ref) / ele.pc_ref
+  β0 = ele.pc_ref / ele.E_tot_ref
+
   begin
     @. ps = sqrt((1.0 + zi[6])^2 - zi[2]^2 - zi[4]^2)
     @. et = sqrt((1.0 + zi[6])^2 + tilde_m^2)
@@ -33,7 +36,8 @@ function track!(ele::Drift, statef::Beam, statei::Beam)
     @. zf[6] = zi[6]
   end
   return statef
-end # function track!(Drift)
+end # function track!(::Drift, ::Beam, ::Beam)
+
 
 """
 track "linear" quadrupole
@@ -43,6 +47,9 @@ function trackQL!(ele::Quadrupole, statef::Beam, statei::Beam)
   L = ele.L
   zi = statei.z
   zf = statef.z
+
+  tilde_m = massof(ele.species_ref) / ele.pc_ref
+  β0 = ele.pc_ref / ele.E_tot_ref
 
   begin
     @. ps = sqrt((1.0 + zi[6])^2 - zi[2]^2 - zi[4]^2)
