@@ -19,16 +19,24 @@ function track!(ele::Drift, beamf::Beam, beam0::Beam)
   L = ele.L
   z0 = beam0.z
   zf = beamf.z
+  m = beam0.species.mass
+  β0 = ele.pc_ref/ ele.E_tot_ref
+
 
   @FastGTPSA begin
-  @. zf[1] = z0[1]+z0[2]*L/(1.0+z0[6])
+  @. tilde_m = m*c_light^c/ele.pc_ref*c_light
+  @. et = sqrt(1.0 + tilde_m^2/(1+z0[6])^2)
+  @. zf[1] = z0[1]+z0[2]*L/(1.0+z0[6]) 
   @. zf[2] = z0[2]
   @. zf[3] = z0[3]+z0[4]*L/(1.0+z0[6])
   @. zf[4] = z0[4]
-  @. zf[5] = z0[5]-L*((z0[2]^2)+(z0[4]^2))/(1.0+z0[6])^2/2.0
+  @. zf[5] = z0[5]-L*(1+((z0[2]^2)+(z0[4]^2))/(1.0+z0[6])^2/2.0-1/(β0*et))
   @. zf[6] = z0[6] 
   end
   return beamf
+end
+
+
 end
 
 
