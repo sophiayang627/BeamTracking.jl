@@ -23,8 +23,12 @@ function track!(L, beamf::Beam, beam0::Beam)
   @assert !(beamf === beam0) "Aliasing beamf === beam0 not allowed!"
   z0 = beam0.z
   zf = beamf.z
+  m = beam0.species.mass
+  β0 = ele.pc_ref/ ele.E_tot_ref
   
   @FastGTPSA! begin
+  @. tilde_m = m*c_light^2/ele.pc_ref*c_light
+  @. et = sqrt(1.0 + tilde_m^2/(1+z0[6])^2)
   @. zf[1] = z0[1]+z0[2]*L/(1.0+z0[6])
   @. zf[2] = z0[2]
   @. zf[3] = z0[3]+z0[4]*L/(1.0+z0[6])
