@@ -5,11 +5,6 @@ using AcceleratorLattice,
       StaticArrays,
       Distributions
 
-# Temporary until AtomicAndPhysicalConstants is cleaned up ----
-import AtomicAndPhysicalConstants: AtomicAndPhysicalConstants
-const Species = AtomicAndPhysicalConstants.Particle
-# -------------------------------------------------------------
-
 export Beam,
        Coords,
        Symplectic,
@@ -58,6 +53,14 @@ function Beam(
 
   return Beam(species, coords)
 end
+
+# Creates a Beam as identity GTPSA
+function Beam(d::Descriptor; species::Species=Species("electron"))
+  GTPSA.numvars(d) == 6 || error("Invalid GTPSA Descriptor! Number of variables must be equal to 6.")
+  z = vars(d)
+  return Beam(species, Coords([z[1]], [z[2]], [z[3]], [z[4]], [z[5]], [z[6]]))
+end
+
 
 # --------------------------------------
 

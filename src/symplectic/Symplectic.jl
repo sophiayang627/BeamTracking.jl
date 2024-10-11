@@ -3,6 +3,8 @@ using ..BeamTracking: Coords, Beam
 using ..GTPSA
 using ..AcceleratorLattice
 
+export track!
+
 """
     track!(ele::Drift, statef::Beam, state0::Beam) -> statef
 
@@ -14,21 +16,43 @@ This function performs exact, hence symplectic, tracking of a `Beam` through a d
   - `state0` -- Input `Beam`
 """ track!
 
-function track!(ele::Drift, statef::Beam, state0::Beam)
-  @assert !(statef === state0) "Aliasing statef === state0 not allowed!"
+function track!(ele::Drift, statef::Beam, statei::Beam)
+  @assert !(statef === statei) "Aliasing statef === statei not allowed!"
   L = ele.L
-  z0 = state0.z
+  zi = statei.z
   zf = statef.z
 
   begin
-    @. ps = sqrt((1.0 + z0[6])^2 - z0[2]^2 - z0[4]^2)
-    @. et = sqrt((1.0 + z0[6])^2 + tilde_m^2)
-    @. zf[1] = z0[1] + z0[2] * L / ps
-    @. zf[2] = z0[2]
-    @. zf[3] = z0[3] + z0[4] * L / ps
-    @. zf[4] = z0[4]
-    @. zf[5] = z0[5] - (1.0 + z0[6]) * (L / ps - L / (β0 * et))
-    @. zf[6] = z0[6]
+    @. ps = sqrt((1.0 + zi[6])^2 - zi[2]^2 - zi[4]^2)
+    @. et = sqrt((1.0 + zi[6])^2 + tilde_m^2)
+    @. zf[1] = zi[1] + zi[2] * L / ps
+    @. zf[2] = zi[2]
+    @. zf[3] = zi[3] + zi[4] * L / ps
+    @. zf[4] = zi[4]
+    @. zf[5] = zi[5] - (1.0 + zi[6]) * (L / ps - L / (β0 * et))
+    @. zf[6] = zi[6]
+  end
+  return statef
+end # function track!(Drift)
+
+"""
+track "linear" quadrupole
+"""
+function trackQL!(ele::Quadrupole, statef::Beam, statei::Beam)
+  @assert !(statef === statei) "Aliasing statef === statei not allowed!"
+  L = ele.L
+  zi = statei.z
+  zf = statef.z
+
+  begin
+    @. ps = sqrt((1.0 + zi[6])^2 - zi[2]^2 - zi[4]^2)
+    @. et = sqrt((1.0 + zi[6])^2 + tilde_m^2)
+    @. zf[1] = zi[1] + zi[2] * L / ps
+    @. zf[2] = zi[2]
+    @. zf[3] = zi[3] + zi[4] * L / ps
+    @. zf[4] = zi[4]
+    @. zf[5] = zi[5] - (1.0 + zi[6]) * (L / ps - L / (β0 * et))
+    @. zf[6] = zi[6]
   end
   return statef
 end # function track(Drift)
