@@ -1,6 +1,8 @@
-"""
-utilities.jl
-"""
+#=
+
+Utility functions needed for tracking.
+
+=#
 
 
 """
@@ -83,7 +85,9 @@ function brho(e_rest, beta_gamma, ne = 1)
 end
 
 
-## If given ``E_\text{kin}`` instead of ``\beta\gamma``, use the following:
+## If given ``E_\text{kin}`` instead of ``\beta\gamma``,
+## use the following:
+#
 #function sr_gamma(e_rest, e_kin)
 #  return e_kin / e_rest + 1
 #end
@@ -112,14 +116,4 @@ end
 #function brho(e_rest, e_kin, ne = 1)
 #  return sr_pc(e_rest, e_kin) / (ne * clight)
 #end
-
-
-
-export sr_gamma,
-       sr_gamma_m1,
-       sr_beta,
-       sr_pc,
-       sr_ekin,
-       sr_etot,
-       brho
 
