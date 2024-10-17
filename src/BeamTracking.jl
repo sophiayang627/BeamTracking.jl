@@ -2,8 +2,9 @@ module BeamTracking
 using GTPSA,
       ReferenceFrameRotations,
       StaticArrays,
-      Distributions,
-      AtomicAndPhysicalConstants
+      Distributions
+
+include("aapc.jl")
 
 export Beam,
        Coords,
@@ -63,7 +64,6 @@ end
 
 
 # --------------------------------------
-
 include("utils.jl")
 
 # Modules separated:
