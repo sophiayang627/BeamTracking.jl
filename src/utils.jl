@@ -67,7 +67,7 @@ end
 For a particle with a given rest energy and relativistic parameter
 ``\\beta\\gamma``, compute the total energy, ``E_\\tot = mc^2\\gamma``.
 """
-function sr_ekin(e_rest, beta_gamma)
+function sr_etot(e_rest, beta_gamma)
   return e_rest * hypot(1, beta_gamma)
 end
 
