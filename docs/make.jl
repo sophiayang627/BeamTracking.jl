@@ -11,11 +11,6 @@ makedocs(;
   ]
 )
 
-    pages=[
-        "Home" => "index.md",
-    ],
-)
-
 deploydocs(;
     repo="github.com/bmad-sim/BeamTracking.jl.git",
 )
