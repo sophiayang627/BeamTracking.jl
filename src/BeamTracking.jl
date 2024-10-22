@@ -4,15 +4,23 @@ using GTPSA,
       StaticArrays,
       Distributions
 
+
 include("aapc.jl")
 
 export Beam,
        Coords,
        Symplectic,
-       Linear
+       Linear,
+        sr_gamma, 
+        sr_gamma_m1,
+        sr_beta,
+        sr_pc,
+        sr_ekin,
+        sr_etot,
+        brho
 
 # SoA ----------------------------------
-struct Coords{T} <: FieldVector{6, T}
+Base.@kwdef struct Coords{T} <: FieldVector{6, T}
   x::Vector{T}
   px::Vector{T}
   y::Vector{T}
@@ -43,6 +51,8 @@ struct Beam{S,T}
   z::Coords{T}
 end
 
+
+
 function Beam(
   n::Integer; species::Species=Species("electron"), beta_gamma_0=1,
   d_x::Distribution=Normal(0,0), d_px::Distribution=Normal(0,0), 
@@ -62,6 +72,14 @@ function Beam(d::Descriptor; species::Species=Species("electron"), beta_gamma_0=
   return Beam(species, beta_gamma_0, Coords([z[1]], [z[2]], [z[3]], [z[4]], [z[5]], [z[6]]))
 end
 
+#Create a Beam struct with single particle for testing
+function Beam(;species::Species=Species("electron"), beta_gamma_0=1,
+  x::Float64=0.0, px::Float64=0.0, y::Float64=0.0,
+  py::Float64=0.0, z::Float64=0.0,pz::Float64=0.0,
+  )
+  coords = Coords(x=[x], px=[px], y=[y], py=[py], z=[z], pz=[pz])
+  return Beam(species, beta_gamma_0, coords)
+end
 
 # --------------------------------------
 include("utils.jl")
