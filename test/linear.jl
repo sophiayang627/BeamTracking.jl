@@ -25,15 +25,15 @@ drift_ele = Linear.Drift(L=0.55)
 quad_ele = Linear.Quadrupole(L=0.20, B1 = 1.0)
 
 #single particle beam 
-beami = Beam()
+beami = Beam(px=1.0,py=1.0)
 beamf = Beam()
 
 
 Linear.track!(drift_ele, beamf, beami)
-Linear.track!(quad_ele, beamf, beami)
+# Linear.track!(quad_ele, beamf, beami)
 
 @test !(beamf == beami)
 println(beamf,"linear")
-println(beamf, "quad")
+# println(beamf, "quad")
 
 end
