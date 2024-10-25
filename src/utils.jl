@@ -91,10 +91,9 @@ end
     Particle(n=1;z)
 For a SoA Coord, extract the phase space coordinates of a specific particle
 """
-function Particle(
+function particle(
   n::Integer=1; z::Coords)
   return [z.x[n],z.px[n],z.y[n],z.py[n],z.z[n],z.pz[n]]
-  
 end
 
 ## If given ``E_\text{kin}`` instead of ``\beta\gamma``,

@@ -20,8 +20,8 @@ export Beam,
         brho,
         chargeof,
         massof,
-        Species
-        Particle
+        Species,
+        particle
 
 # SoA ----------------------------------
 Base.@kwdef struct Coords{T} <: FieldVector{6, T}
