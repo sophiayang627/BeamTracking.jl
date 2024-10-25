@@ -9,3 +9,5 @@ Base.@kwdef struct Species
 end
 massof(::Species) = 510998.95069
 chargeof(::Species) = -1
+
+c_light = 2.99792458e8

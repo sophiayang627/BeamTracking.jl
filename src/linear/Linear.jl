@@ -1,7 +1,6 @@
 module Linear
-using ..GTPSA: @FastGTPSA!
+using ..GTPSA: @FastGTPSA!, GTPSA
 using ..BeamTracking
-using aapc
 
 
 export track!
