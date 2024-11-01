@@ -9,6 +9,8 @@ include("aapc.jl")
 
 export Beam,
        Coords,
+       Particle,
+       Coord, 
        Symplectic,
        Linear,
         sr_gamma, 
@@ -20,8 +22,7 @@ export Beam,
         brho,
         chargeof,
         massof,
-        Species,
-        particle
+        Species
 
 # SoA ----------------------------------
 Base.@kwdef struct Coords{T} <: FieldVector{6, T}
@@ -79,15 +80,47 @@ function Beam(d::Descriptor; species::Species=Species("electron"), beta_gamma_0=
 end
 
 #Create a Beam with single particle for testing
-function Beam(;species::Species=Species("electron"), beta_gamma_0=1,
-  x=0.0, px=0.0, y=0.0,
-  py=0.0, z=0.0, pz=0.0,
+function Beam(
+  ;species::Species=Species("electron"), beta_gamma_0=1,
+  x=0.0, px=0.0, y=0.0, py=0.0, z=0.0, pz=0.0,
   )
+  
   coords = Coords(x=[x], px=[px], y=[y], py=[py], z=[z], pz=[pz])
+
   return Beam(species, beta_gamma_0, coords)
 end
 
+#AoS from SoA for single particle
+# Extract the phase space coord of a particle in a beam 
+struct Coord{T} <: FieldVector{6, T} # Just like Coords but only 1 Coord 
+  x::T
+  px::T
+  y::T
+  py::T
+  z::T
+  pz::T
+end
 
+function Coord(
+  ;x=0.0, px=0.0, y=0.0,
+  py=0.0, z=0.0, pz=0.0,
+  )
+  return Coord(x, px, y, py, z, pz)
+end
+
+
+struct Particle{S,T}
+  species::Species
+  beta_gamma_0::S
+  z::Coord{T}
+end
+
+function Particle(n::Integer=1; b::Beam)
+  z = b.z
+  coord = Coord(z.x[n],z.px[n],z.y[n],z.py[n],z.z[n],z.pz[n])
+  
+  return Particle(b.species, b.beta_gamma_0, coord)
+end
 
 # --------------------------------------
 include("utils.jl")

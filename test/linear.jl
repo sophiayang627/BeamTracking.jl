@@ -1,30 +1,46 @@
 
 using BeamTracking
 using Test
+using GTPSA
 
 
 @testset "Linear" begin
 #drift 
 drift_ele = Linear.Drift(L=0.55)
 #Quadrupole
-quad_ele = Linear.Quadrupole(L=0.20, B1 = 1.0)
+quad_ele1 = Linear.Quadrupole(L=0.55, B1 = 0.1) #positive B1
+quad_ele2 = Linear.Quadrupole(L=0.55, B1 = 0.0) #no strength, same as drift
+quad_ele3 = Linear.Quadrupole(L=0.55, B1 = -0.1) #negative B1
+quad_ele4 = Linear.Quadrupole(L=0.55, B1 = 2.0) #big B1
 
-#single particle beam 
-bi1 = Beam(x=1.0,px=1.0,py=1.0)
-bf1 = Beam()
-
-bi2 = Beam(x=1.0,px=1.0,py=1.0)
-bf2 = Beam()
+#single particle beam
+d = Descriptor(6,1)
+bi = Beam(x=1.0,px=0.1,y=1.0,py=0.1,z=0.1,pz=0.1)
+bf = Beam()
 
 
-Linear.track!(drift_ele, bf1, bi1)
+#Drift 
+Linear.track!(drift_ele, bf, bi)
+@test !(bf == bi)
 
-Linear.track!(quad_ele, bf2, bi2)
 
-@test !(bf1 == bi1)
-@test !(bf2 == bi2)
+println(bf,"drift")
+par = Particle(b=bf)
+mat6 = GTPSA.jacobian(par.z)
+println(bf,mat6,"drift")
 
-println(bf1,"linear")
-println(bf2, "quad")
+ # if mat6 = mat from bmad
 
+#Quad
+Linear.track!(quad_ele2, bf, bi) # positive B1
+@test !(bf == bi)
+println(bf,"quad")
+#par = Particle(b=bf)
+#mat6=GTPSA.jacobian(par.z)
+#println(bf,mat6,"quad with k1=0")
+
+#check horizontal focusing, vertical defocusing for B>0
+#check vertical focusing, horizontal defocusing for B<0
+
+#0 strength quadrupole should give the same result as a drift
 end

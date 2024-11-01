@@ -84,18 +84,6 @@ DTA: Need to handle energy units other than ``\\mathrm{eV}``..
 function brho(e_rest, beta_gamma, ne = 1)
   return sr_pc(e_rest, beta_gamma) / (ne * c_light)
 end
-
-# Extract the phase space coord of a particle in a beam 
-
-"""
-    Particle(n=1;z)
-For a SoA Coord, extract the phase space coordinates of a specific particle
-"""
-function particle(
-  n::Integer=1; z::Coords)
-  return [z.x[n],z.px[n],z.y[n],z.py[n],z.z[n],z.pz[n]]
-end
-
 ## If given ``E_\text{kin}`` instead of ``\beta\gamma``,
 ## use the following:
 #
