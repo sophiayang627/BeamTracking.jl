@@ -149,16 +149,16 @@ function sincu(z::Number)
 end
 
 """
-    sinch(z)
+    sinhc(z)
 
 ## Description
-Compute the hyperbolic sinc function, ``\\operatorname{sinch}(z) = \\operatorname{sinh}(z) / z``,
+Compute the hyperbolic sinc function, ``\\operatorname{sinhc}(z) = \\operatorname{sinh}(z) / z``,
 with a correct treatment of the removable singularity at the origin.
 
 ### Implementation
 See sincu for notes about implementation.
 """
-function sinch(z::Number)
+function sinhc(z::Number)
   threshold = sqrt(2eps())
   if abs(z) < threshold
     return 1.
@@ -168,5 +168,5 @@ function sinch(z::Number)
 end
 
 export sincu,
-       sinch
+       sinhc
 

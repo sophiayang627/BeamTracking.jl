@@ -70,7 +70,7 @@ function track!(ele::Symplectic.Quadrupole, beamf::Beam, beami::Beam)
   @assert !(beamf === beami) "Aliasing beamf === beami not allowed!"
   L = ele.L
 
-  # κ^2 (kappa-squared) = (q g / P0) / (1 + δ)
+  # κ^2 (kappa-squared) := (q g / P0) / (1 + δ)
   # numerator of κ^2
   k2_num = chargeof(species) * ele.B1 / ele.P0
 
@@ -101,10 +101,10 @@ function trackQuadMx!(beamf::Beam, beami::Beam, k2_num, s)
 
   @. cx =  focus * cos(ks)    + defocus * cosh(ks)
   @. cy =  focus * cosh(ks)   + defocus * cos(ks)
-  @. sx =  focus * sincu(ks)  + defocus * sinch(ks)
-  @. sy =  focus * sinch(ks)  + defocus * sincu(ks)
-  @. sx2 = focus * sincu(2ks) + defocus * sinch(2ks)
-  @. sy2 = focus * sinch(2ks) + defocus * sincu(2ks)
+  @. sx =  focus * sincu(ks)  + defocus * sinhc(ks)
+  @. sy =  focus * sinhc(ks)  + defocus * sincu(ks)
+  @. sx2 = focus * sincu(2ks) + defocus * sinhc(2ks)
+  @. sy2 = focus * sinhc(2ks) + defocus * sincu(2ks)
   @. sxz = focus * sin(ks)^2  + defocus * sinh(ks)^2
   @. syz = focus * sinh(ks)^2 + defocus * sin(ks)^2
 
@@ -137,15 +137,15 @@ function trackQuadK!(beamf::Beam, beami::Beam, s::Float64)
   zi = beami.z
   zf = beamf.z
 
-  tilde_m = 1 / beami.beta_gamma_0
+  tilde_m = 1 / beami.beta_gamma_0  # mc^2 / p0·c
   beta_0 = sr_beta(beami.beta_gamma_0)
 
   @. p = 1 + zi.pz  # reduced momentum, P/P0 = 1 + δ
   @. ptr2 = px^r + py^2
   @. ps = sqrt(p^2 - ptr2)
 
-  @. zf.x  = zi.x + s * zi.px / p * ptr2 / (ps (p + ps))
-  @. zf.y  = zi.y + s * zi.py / p * ptr2 / (ps (p + ps))
+  @. zf.x  = zi.x + s * zi.px / p * ptr2 / (ps * (p + ps))
+  @. zf.y  = zi.y + s * zi.py / p * ptr2 / (ps * (p + ps))
   @. zf.z  = zi.z - s * (p / ps - (1/2) * ptr2 / p^2
                          - p / (β0 * sqrt(p^2 + tilde_m^2)))
   @. zf.px = zi.px
