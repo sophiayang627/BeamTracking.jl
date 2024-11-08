@@ -5,11 +5,10 @@
 [![Build Status](https://github.com/bmad-sim/BeamTracking.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/bmad-sim/BeamTracking.jl/actions/workflows/CI.yml?query=branch%3Amain)
 
 
-To develop this package, you will need [`AtomicAndPhysicalConstants.jl`](https://github.com/bmad-sim/AtomicAndPhysicalConstants.jl) which is not yet on the official Julia registry. Therefore in the Julia REPL run:
+To develop this package:
 
 ```julia
 import Pkg;
-Pkg.develop(url="https://github.com/bmad-sim/AtomicAndPhysicalConstants.jl.git"); # Dependency
 Pkg.develop(url="https://github.com/bmad-sim/BeamTracking.jl.git"); # This package! Replace bmad-sim with your username if working on a fork
 ```
 
