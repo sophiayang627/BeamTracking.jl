@@ -1,45 +1,41 @@
 using BeamTracking
-using AcceleratorLattice
+using AtomicAndPhysicalConstants
 using Test
 
 # define beams
+# -- species
 e_minus = Species("electron")
-mec2 = mass(e_minus)
-ekin1 = 5.e3;  # eV
-ekin2 = 1.e6;  # eV
-ekin3 = 1.e9;  # eV
-bg1 = sqrt(ekin1 / mec2 * (ekin1 / mec2 + 2))
-bg2 = sqrt(ekin2 / mec2 * (ekin2 / mec2 + 2))
-bg3 = sqrt(ekin3 / mec2 * (ekin3 / mec2 + 2))
+mec2 = 0.51099895069e6; #massof(e_minus)
+# -- kinetic energy
+ek1 = 5.e3;  # eV
+ek2 = 1.e6;  # eV
+ek3 = 1.e9;  # eV
+# -- βγ
+bg1 = sqrt(ek1 / mec2 * (ek1 / mec2 + 2))
+bg2 = sqrt(ek2 / mec2 * (ek2 / mec2 + 2))
+bg3 = sqrt(ek3 / mec2 * (ek3 / mec2 + 2))
+# -- pc
 pc1 = mec2 * bg1
 pc2 = mec2 * bg2
 pc3 = mec2 * bg3
-zi1 = Beam(8; beta_gamma_0 = bg1)
+# -- beams
+beami1 = Beam(8; beta_gamma_0 = bg1)
 
 # define elements
-@ele start1 = BeginningEle(pc_ref = pc1, species_ref = e_minus);
-@ele d1 = Drift(L = 0.15);
-@ele start2 = BeginningEle(pc_ref = pc2, species_ref = e_minus);
-@ele d2 = Drift(L = 0.75);
-@ele start3 = BeginningEle(pc_ref = pc3, species_ref = e_minus);
-@ele d3 = Drift(L = 2.00);
+# -- drifts
+dr1 = Symplectic.Drift(0.15);
+dr2 = Symplectic.Drift(0.75);
+dr3 = Symplectic.Drift(2.00);
+# -- quadrupoles
 
-# define beamlines
-bl1_drift = BeamLine([ start1, d1 ]);
-bl2_drift = BeamLine([ start2, d2 ]);
-bl3_drift = BeamLine([ start3, d3 ]);
-
-# expand beamlines
-lat1_drift = Lat([ bl1_drift ])
-lat2_drift = Lat([ bl2_drift ])
-lat3_drift = Lat([ bl3_drift ])
 
 # test individual elements
 @testset "element_tests" begin
   # drift
-  @test lat1_drift["d1"][1].L == 0.15
-  #@test track!(lat_drift["d1"][1], zf, zi);
-  #      zf == [ x_f, px_f, y_f, py_f, z_f, pz_f ]
+  @test dr1.L == 0.15
+  @test dr2.L == 0.75
+  #@test track!(d1, beamf, beami);
+  #      beamf.z == [ x_f, px_f, y_f, py_f, z_f, pz_f ]
 
   # quadrupole
 
