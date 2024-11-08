@@ -13,16 +13,16 @@ export Beam,
        Coord, 
        Symplectic,
        Linear,
-        sr_gamma, 
-        sr_gamma_m1,
-        sr_beta,
-        sr_pc,
-        sr_ekin,
-        sr_etot,
-        brho,
-        chargeof,
-        massof,
-        Species
+       sr_gamma, 
+       sr_gamma_m1,
+       sr_beta,
+       sr_pc,
+       sr_ekin,
+       sr_etot,
+       brho,
+       chargeof,
+       massof,
+       Species
 
 # SoA ----------------------------------
 Base.@kwdef struct Coords{T}
@@ -92,22 +92,14 @@ end
 
 #AoS from SoA for single particle
 # Extract the phase space coord of a particle in a beam 
-struct Coord{T} <: FieldVector{6, T} # Just like Coords but only 1 Coord 
-  x::T
-  px::T
-  y::T
-  py::T
-  z::T
-  pz::T
+Base.@kwdef struct Coord{T} <: FieldVector{6, T} # Just like Coords but only 1 Coord 
+  x::T  = 0.0
+  px::T = 0.0
+  y::T  = 0.0
+  py::T = 0.0
+  z::T  = 0.0
+  pz::T = 0.0
 end
-
-function Coord(
-  ;x=0.0, px=0.0, y=0.0,
-  py=0.0, z=0.0, pz=0.0,
-  )
-  return Coord(x, px, y, py, z, pz)
-end
-
 
 struct Particle{S,T}
   species::Species
@@ -115,7 +107,7 @@ struct Particle{S,T}
   z::Coord{T}
 end
 
-function Particle(n::Integer=1; b::Beam)
+function Particle(b::Beam, n::Integer=1)
   z = b.z
   coord = Coord(z.x[n],z.px[n],z.y[n],z.py[n],z.z[n],z.pz[n])
   
