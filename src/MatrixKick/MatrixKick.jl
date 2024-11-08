@@ -1,4 +1,4 @@
-module Symplectic
+module MatrixKick
 using ..GTPSA: @FastGTPSA!, GTPSA
 import ..BeamTracking: track!
 using ..BeamTracking
@@ -105,5 +105,5 @@ function trackQuadMf!(beamf::Beam, beami::Beam, s::Float64, kappa_num::Float64)
 end # function trackQ!M::Quadrupole()
 
 
-end # module Symplectic
+end # module MatrixKick
 

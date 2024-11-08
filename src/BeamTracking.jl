@@ -12,7 +12,7 @@ export Beam,
        Coords,
        Particle,
        Coord, 
-       Symplectic,
+       MatrixKick,
        Linear,
        sr_gamma, 
        sr_gamma_m1,
@@ -123,8 +123,8 @@ track!(beamf::Beam, ::Nothing, beami::Beam) = (beamf.z .= beami.z; return)
 include("utils.jl")
 
 # Modules separated:
-include("symplectic/Symplectic.jl") 
-include("linear/Linear.jl")   
+include("MatrixKick/MatrixKick.jl") 
+include("Linear/Linear.jl")   
 
 
 end
