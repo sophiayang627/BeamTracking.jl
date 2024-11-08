@@ -4,15 +4,28 @@ using GTPSA,
       StaticArrays,
       Distributions
 
+
 include("aapc.jl")
 
 export Beam,
        Coords,
+       Particle,
+       Coord, 
        Symplectic,
-       Linear
+       Linear,
+       sr_gamma, 
+       sr_gamma_m1,
+       sr_beta,
+       sr_pc,
+       sr_ekin,
+       sr_etot,
+       brho,
+       chargeof,
+       massof,
+       Species
 
 # SoA ----------------------------------
-struct Coords{T} <: FieldVector{6, T}
+Base.@kwdef struct Coords{T}
   x::Vector{T}
   px::Vector{T}
   y::Vector{T}
@@ -37,11 +50,15 @@ function Coords(
   return Coords(x, px, y, py, z, pz)
 end
 
+
+
 struct Beam{S,T}
   species::Species
   beta_gamma_0::S
   z::Coords{T}
 end
+
+
 
 function Beam(
   n::Integer; species::Species=Species("electron"), beta_gamma_0=1,
@@ -62,12 +79,47 @@ function Beam(d::Descriptor; species::Species=Species("electron"), beta_gamma_0=
   return Beam(species, beta_gamma_0, Coords([z[1]], [z[2]], [z[3]], [z[4]], [z[5]], [z[6]]))
 end
 
+#Create a Beam with single particle for testing
+function Beam(
+  ;species::Species=Species("electron"), beta_gamma_0=1,
+  x=0.0, px=0.0, y=0.0, py=0.0, z=0.0, pz=0.0,
+  )
+  
+  coords = Coords(x=[x], px=[px], y=[y], py=[py], z=[z], pz=[pz])
+
+  return Beam(species, beta_gamma_0, coords)
+end
+
+#AoS from SoA for single particle
+# Extract the phase space coord of a particle in a beam 
+Base.@kwdef struct Coord{T} <: FieldVector{6, T} # Just like Coords but only 1 Coord 
+  x::T  = 0.0
+  px::T = 0.0
+  y::T  = 0.0
+  py::T = 0.0
+  z::T  = 0.0
+  pz::T = 0.0
+end
+
+struct Particle{S,T}
+  species::Species
+  beta_gamma_0::S
+  z::Coord{T}
+end
+
+function Particle(b::Beam, n::Integer=1)
+  z = b.z
+  coord = Coord(z.x[n],z.px[n],z.y[n],z.py[n],z.z[n],z.pz[n])
+  
+  return Particle(b.species, b.beta_gamma_0, coord)
+end
 
 # --------------------------------------
 include("utils.jl")
 
 # Modules separated:
 include("symplectic/Symplectic.jl") 
-include("linear/Linear.jl")    
+include("linear/Linear.jl")   
+
 
 end
