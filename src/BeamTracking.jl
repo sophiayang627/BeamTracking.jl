@@ -25,7 +25,7 @@ export Beam,
         Species
 
 # SoA ----------------------------------
-Base.@kwdef struct Coords{T} <: FieldVector{6, T}
+Base.@kwdef struct Coords{T}
   x::Vector{T}
   px::Vector{T}
   y::Vector{T}
