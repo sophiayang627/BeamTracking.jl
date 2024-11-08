@@ -84,20 +84,6 @@ function track!(ele::Linear.Quadrupole,beamf::Beam,beami::Beam)
   greater = k1 >= 0.0 #horizontal focusing
   smaller = k1 < 0.0 #horizontal defocusing 
   
-  # s = sin(kl)
-  # sh = sinh(kl)
-  # sc = sinc(kl)
-  # shc = sinhc(kl)
-  # c = cos(kl)
-  # ch = cosh(kl)
-
-
-  # cx = (cos(kl) * (greater) + cosh(kl) * (smaller)) 
-  # sx = (sin(kl) * (greater) + sinh(kl) * (smaller))
-  # sxc = (sinc(kl) * (greater) + sinhc(kl) * (smaller))
-  # cy = (cosh(kl) * (greater) + cos(kl) * (smaller))
-  # sy = (sinh(kl) * (greater) + sin(kl) * (smaller))
-  # syc = (sinhc(kl) * (greater) + sinc(kl) * (smaller))
 
   if greater
     #horizontal focusing
