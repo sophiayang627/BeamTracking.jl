@@ -89,7 +89,7 @@ function track!(ele::Linear.Quadrupole,beamf::Beam,beami::Beam)
     #horizontal focusing
     cx = cos(kl)
     sx = sin(kl)
-    sxc = sinc(kl)
+    sxc = sincu(kl)
     cy = cosh(kl)
     sy = sinh(kl)
     syc = sinhc(kl)
@@ -100,7 +100,7 @@ function track!(ele::Linear.Quadrupole,beamf::Beam,beami::Beam)
      sxc = sinhc(kl)
      cy = cos(kl)
      sy = sin(kl)
-     syc = sinc(kl)
+     syc = sincu(kl)
   end
 
   @FastGTPSA! begin
