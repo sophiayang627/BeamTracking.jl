@@ -116,3 +116,56 @@ end
 #  return sr_pc(e_rest, e_kin) / (ne * clight)
 #end
 
+
+"""
+    sincu(z)
+
+## Description
+Compute the unnormalized sinc function, ``\\operatorname{sincu}(z) = \\sin(z) / z``,
+with a correct treatment of the removable singularity at the origin.
+
+### Implementation
+The function ``\\sin(z) / z = 1 - z^2 / 3! + z^4 / 5! - z^6 / 7! + \\cdots``.
+For real values of ``z \\in (-1,1)``, one can truncate this series just before
+the ``k^\\text{th}`` term, ``z^{2k} / (2k+1)!``, and the alternating nature of
+the series guarantees the error does not exceed the value of this first truncated term.
+It follows that if ``z^2 / 6 < \\varepsilon_\\text{machine}``, simply truncating
+the series to 1 yields machine precision accuracy near the origin.
+And outside that neighborhood, one simply computes ``\\sin(z) / z``.
+On the otherhand, if we allow for complex values, one can no longer assume the
+series alternates, and one must use a more conservative threshold.
+Numerical exploration suggests that for ``|z| < 1`` the sum of terms starting
+at the ``k^\\text{th}`` term is bounded by ``|z|^{2k} / (2k)!``.
+It then follows that one should use ``|z|^2 / 2 < \\varepsilon_\\text{machine}``
+as the criterion for deciding to truncate the series to 1 near the origin.
+"""
+function sincu(z::Number)
+  threshold = sqrt(2eps())
+  if abs(z) < threshold
+    return 1.
+  else
+    return sin(z) / z
+  end
+end
+
+"""
+    sinhc(z)
+
+## Description
+Compute the hyperbolic sinc function, ``\\operatorname{sinhc}(z) = \\operatorname{sinh}(z) / z``,
+with a correct treatment of the removable singularity at the origin.
+
+### Implementation
+See sincu for notes about implementation.
+"""
+function sinhc(z::Number)
+  threshold = sqrt(2eps())
+  if abs(z) < threshold
+    return 1.
+  else
+    return sinh(z) / z
+  end
+end
+
+export sincu,
+       sinhc

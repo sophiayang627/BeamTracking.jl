@@ -2,7 +2,6 @@ module Linear
 using ..GTPSA: @FastGTPSA!, GTPSA
 using ..BeamTracking
 
-
 export track!
 
 Base.@kwdef struct Drift{T}
@@ -59,7 +58,7 @@ function track!(ele::Linear.Drift, beamf::Beam, beami::Beam)
   @. zf.px = zi.px
   @. zf.y  = zi.y + zi.py * L
   @. zf.py = zi.py
-  @. zf.z  = zi.z
+  @. zf.z  = zi.z + zf.pz * L
   @. zf.pz = zi.pz 
   end
   
@@ -83,21 +82,48 @@ function track!(ele::Linear.Quadrupole,beamf::Beam,beami::Beam)
 
   kl = k * L
   greater = k1 >= 0.0 #horizontal focusing
-  smaller = k1 < 0.0 #vertical focusing 
+  smaller = k1 < 0.0 #horizontal defocusing 
+  
+  # s = sin(kl)
+  # sh = sinh(kl)
+  # sc = sinc(kl)
+  # shc = sinhc(kl)
+  # c = cos(kl)
+  # ch = cosh(kl)
 
-  cx = (cos(kl) * (greater) + cosh(kl) * (smaller)) 
-  sx = (sin(kl) * (greater) + sinh(kl) * (smaller))
-  cy = (cosh(kl) * (greater) + cos(kl) * (smaller))
-  sy = (sinh(kl) * (greater) + sin(kl) * (smaller))
 
+  # cx = (cos(kl) * (greater) + cosh(kl) * (smaller)) 
+  # sx = (sin(kl) * (greater) + sinh(kl) * (smaller))
+  # sxc = (sinc(kl) * (greater) + sinhc(kl) * (smaller))
+  # cy = (cosh(kl) * (greater) + cos(kl) * (smaller))
+  # sy = (sinh(kl) * (greater) + sin(kl) * (smaller))
+  # syc = (sinhc(kl) * (greater) + sinc(kl) * (smaller))
+
+  if greater
+    #horizontal focusing
+    cx = cos(kl)
+    sx = sin(kl)
+    sxc = sinc(kl)
+    cy = cosh(kl)
+    sy = sinh(kl)
+    syc = sinhc(kl)
+  else
+     #horizontal defocusing
+     cx = cosh(kl)
+     sx = sinh(kl)
+     sxc = sinhc(kl)
+     cy = cos(kl)
+     sy = sin(kl)
+     syc = sinc(kl)
+  end
 
   @FastGTPSA! begin
-   @. zf.x  = zi.x * cx + zi.px * sx / k 
-   @. zf.px = (-1 * (smaller) + 1 * (greater)) * zi.x * sx + zi.px * cx
-   @. zf.y = zi.y * cy + zi.py * sy / k
-   @. zf.py = (1 * (smaller) - 1 * (greater)) * zi.y * k * sy + zi.py * cy
-   @. zf.z = zi.z + zi.pz * L 
-   @. zf.pz = zi.pz
+   @.zf.x  = zi.x * cx + zi.px * sxc * L
+   @.zf.px = (-1 * (greater) + 1 * (smaller)) * zi.x * k * sx + zi.px * cx
+   @.zf.y = zi.y * cy + zi.py * syc * L 
+   @.zf.py = (1 * (greater) - 1 * (smaller)) * zi.y * k * sy + zi.py * cy
+   @.zf.z = zi.z + zi.pz * L 
+   @.zf.pz = zi.pz
   end 
 
   return beamf
@@ -123,7 +149,7 @@ function track!(ele::Linear.SBend,beamf::Beam,beami::Beam)
   @. zf.px = -zi.x * k * sin(kl) + zi.px * cos(kl) + zi.pz * sin(kl)
   @. zf.y = zi.y + zi.py * L
   @. zf.py = zi.py
-  @. zf.z = -zi.x * sin(kl) + zi.px (cos(kl) - 1) / k + zi.z + zi.pz * (sin(kl) - kl) / k
+  @. zf.z = -zi.x * sin(kl) + zi.px * (cos(kl) - 1) / k + zi.z + zi.pz * (sin(kl) - kl) / k
   @. zf.pz = zi.pz
  end 
 end 
@@ -154,9 +180,10 @@ function track!(ele::Linear.Combined,beamf::Beam,beami::Beam)
   @. zf.x  = zi.x * cos(Kl) +  zi.px * sin(Kl) / sqK + zi.pz * (1 - cos(Kl)) * ka / K
   @. zf.px = - zi.x * sqK * sin(Kl) + zi.px * cos(Kl) + zi.pz * sin(Kl) * ka / sqK
   @. zf.y =  zi.y * cosh(kl) + zi.py * sinh(kl) / sqk
-  @. zf.py = zi.px * sqK * sinh(kl) + zi.py * cosh(kl)
-  @. zf.z = zi.z + zi.pz * (sin(Kl) / sqK - l) *  ka^2 / K
+  @. zf.py = zi.y * sqK * sinh(kl) + zi.py * cosh(kl)
+  @. zf.z = - zi.x * sin(Kl) * ka / sqK + zi.px * (cos(Kl)-1) * ka / K + zi.z + zi.pz * (sin(Kl) / sqK - l) *  ka^2 / K
   @. zf.pz = zi.pz
  end 
 end 
+
 end
