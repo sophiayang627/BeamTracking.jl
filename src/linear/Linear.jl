@@ -1,5 +1,6 @@
 module Linear
 using ..GTPSA: @FastGTPSA!, GTPSA
+import ..BeamTracking: track!
 using ..BeamTracking
 
 export track!
@@ -37,7 +38,7 @@ end
 
 
 """
-    track!(ele::Linear.Drift, beamf::Beam, beami::Beam) -> beamf
+    track!(beamf::Beam, ele::Linear.Drift, beami::Beam) -> beamf
 
 Routine to tracking through a drift using the  approximation and 
 including higher-order energy effects. 
@@ -47,7 +48,7 @@ including higher-order energy effects.
 - `beamf` -- Output beam after tracking through
 - `beami` -- Input beam before tracking through
 """
-function track!(ele::Linear.Drift, beamf::Beam, beami::Beam)
+function track!(beamf::Beam, ele::Linear.Drift, beami::Beam)
   @assert !(beamf === beami) "Aliasing beamf === beami not allowed!"
   L = ele.L
   zi = beami.z
@@ -69,7 +70,7 @@ end
 """
 Routine to linearly tracking through a quadrupole
 """
-function track!(ele::Linear.Quadrupole,beamf::Beam,beami::Beam)
+function track!(beamf::Beam, ele::Linear.Quadrupole, beami::Beam)
   @assert !(beamf === beami) "Aliasing beamf === beami not allowed!"
   zi = beami.z
   zf = beamf.z
@@ -104,12 +105,12 @@ function track!(ele::Linear.Quadrupole,beamf::Beam,beami::Beam)
   end
 
   @FastGTPSA! begin
-   @.zf.x  = zi.x * cx + zi.px * sxc * L
-   @.zf.px = (-1 * (greater) + 1 * (smaller)) * zi.x * k * sx + zi.px * cx
-   @.zf.y = zi.y * cy + zi.py * syc * L 
-   @.zf.py = (1 * (greater) - 1 * (smaller)) * zi.y * k * sy + zi.py * cy
-   @.zf.z = zi.z + zi.pz * L 
-   @.zf.pz = zi.pz
+  @. zf.x  = zi.x * cx + zi.px * sxc * L
+  @. zf.px = (-1 * (greater) + 1 * (smaller)) * zi.x * k * sx + zi.px * cx
+  @. zf.y = zi.y * cy + zi.py * syc * L 
+  @. zf.py = (1 * (greater) - 1 * (smaller)) * zi.y * k * sy + zi.py * cy
+  @. zf.z = zi.z + zi.pz * L 
+  @. zf.pz = zi.pz
   end 
 
   return beamf
@@ -118,7 +119,7 @@ end
 """
 Routine to linearly tracking through a Sector Magnet
 """
-function track!(ele::Linear.SBend,beamf::Beam,beami::Beam)
+function track!(beamf::Beam, ele::Linear.SBend, beami::Beam)
   @assert !(beamf === beami) "Aliasing beamf === beami not allowed!"
   zi = beami.z
   zf = beamf.z
@@ -137,14 +138,14 @@ function track!(ele::Linear.SBend,beamf::Beam,beami::Beam)
   @. zf.py = zi.py
   @. zf.z = -zi.x * sin(kl) + zi.px * (cos(kl) - 1) / k + zi.z + zi.pz * (sin(kl) - kl) / k
   @. zf.pz = zi.pz
- end 
+  end 
 end 
 
 
 """
 Routine to linearly tracking through a Combined Magnet
 """
-function track!(ele::Linear.Combined,beamf::Beam,beami::Beam)
+function track!(beamf::Beam, ele::Linear.Combined, beami::Beam)
   @assert !(beamf === beami) "Aliasing beamf === beami not allowed!"
   zi = beami.z
   zf = beamf.z
@@ -169,7 +170,7 @@ function track!(ele::Linear.Combined,beamf::Beam,beami::Beam)
   @. zf.py = zi.y * sqK * sinh(kl) + zi.py * cosh(kl)
   @. zf.z = - zi.x * sin(Kl) * ka / sqK + zi.px * (cos(Kl)-1) * ka / K + zi.z + zi.pz * (sin(Kl) / sqK - l) *  ka^2 / K
   @. zf.pz = zi.pz
- end 
+  end 
 end 
 
 end

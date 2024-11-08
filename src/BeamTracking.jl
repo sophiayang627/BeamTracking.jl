@@ -2,7 +2,8 @@ module BeamTracking
 using GTPSA,
       ReferenceFrameRotations,
       StaticArrays,
-      Distributions
+      Distributions,
+      Unitful
 
 
 include("aapc.jl")
@@ -22,7 +23,10 @@ export Beam,
        brho,
        chargeof,
        massof,
-       Species
+       Species,
+       sincu,
+       sinhc,
+       track!
 
 # SoA ----------------------------------
 Base.@kwdef struct Coords{T}
@@ -57,8 +61,6 @@ struct Beam{S,T}
   beta_gamma_0::S
   z::Coords{T}
 end
-
-
 
 function Beam(
   n::Integer; species::Species=Species("electron"), beta_gamma_0=1,
@@ -113,6 +115,9 @@ function Particle(b::Beam, n::Integer=1)
   
   return Particle(b.species, b.beta_gamma_0, coord)
 end
+
+# Empty tracking method ----------------
+track!(beamf::Beam, ::Nothing, beami::Beam) = (beamf.z .= beami.z; return)
 
 # --------------------------------------
 include("utils.jl")

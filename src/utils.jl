@@ -167,5 +167,3 @@ function sinhc(z::Number)
   end
 end
 
-export sincu,
-       sinhc

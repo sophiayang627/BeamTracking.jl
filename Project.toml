@@ -8,12 +8,14 @@ Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 GTPSA = "b27dd330-f138-47c5-815b-40db9dd9b6e8"
 ReferenceFrameRotations = "74f56ac7-18b3-5285-802d-d4bd4f104033"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [compat]
 Distributions = "0.25"
 GTPSA = "1.2.0"
 ReferenceFrameRotations = "3"
 StaticArrays = "1"
+Unitful = "1.21.0"
 julia = "1.9"
 
 [extras]

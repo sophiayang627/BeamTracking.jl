@@ -1,6 +1,7 @@
 module Symplectic
-using ..BeamTracking: Coords, Beam
-using ..GTPSA: @FastGTPSA!
+using ..GTPSA: @FastGTPSA!, GTPSA
+import ..BeamTracking: track!
+using ..BeamTracking
 
 export track!
 
@@ -14,16 +15,16 @@ struct Quadrupole{T}
 end
 
 """
-    track!(ele::Symplectic.Drift, beamf::Beam, beami::Beam) -> beamf
+    track!(beamf::Beam, ele::Drift, beami::Beam) -> beamf
 
 This function performs exact, hence symplectic, tracking of a `Beam` through a drift.
 
 ### Arguments
-  - `ele`    -- `Drift`-type element
   - `beamf` -- Output `Beam`
+  - `ele`    -- `Drift`-type element
   - `beami` -- Input `Beam`
 """
-function track!(ele::Drift, beamf::Beam, beami::Beam)
+function track!(beamf::Beam, ele::Drift, beami::Beam)
   @assert !(beamf === beami) "Aliasing beamf === beami not allowed!"
   @assert !(beamf.species === beami.species) "Input species must be equal to output!"
   L = ele.L
@@ -48,7 +49,7 @@ end # function track!(::Drift, ::Beam, ::Beam)
 """
 track quadrupole
 """
-function track!(ele::Quadrupole, beamf::Beam, beami::Beam)
+function track!(beamf::Beam, ele::Quadrupole, beami::Beam)
   @assert !(beamf === beami) "Aliasing beamf === beami not allowed!"
   L = ele.L
   zi = beami.z
