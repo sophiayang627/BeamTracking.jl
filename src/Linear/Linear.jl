@@ -45,7 +45,7 @@ including higher-order energy effects.
 
 ### Arguments
 - `beam` -- Input/output beam before/after tracking through
-- `ele`   -- `Drift` type element
+- `ele`  -- `Drift` type element
 """
 function track!(beam::Beam, ele::Linear.Drift)
   L = ele.L
