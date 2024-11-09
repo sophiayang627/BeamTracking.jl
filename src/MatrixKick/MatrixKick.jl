@@ -28,8 +28,8 @@ function track!(beamf::Beam, ele::Drift, beami::Beam)
   @assert !(beamf === beami) "Aliasing beamf === beami not allowed!"
   @assert !(beamf.species === beami.species) "Input species must be equal to output!"
   L = ele.L
-  zi = beami.z
-  zf = beamf.z
+  zi = beami.vec
+  zf = beamf.vec
 
   tilde_m = mass(beami.species) / pc_ref(beami.species, beami.beta_0)
 
@@ -52,8 +52,8 @@ track quadrupole
 function track!(beamf::Beam, ele::Quadrupole, beami::Beam)
   @assert !(beamf === beami) "Aliasing beamf === beami not allowed!"
   L = ele.L
-  zi = beami.z
-  zf = beamf.z
+  zi = beami.vec
+  zf = beamf.vec
 
   tilde_m = massof(ele.species_ref) / ele.pc_ref
   β0 = ele.pc_ref / ele.E_tot_ref
@@ -74,8 +74,8 @@ end # function track!(::Quadrupole)
 track "matrix part" of quadrupole
 """
 function trackQuadMf!(beamf::Beam, beami::Beam, s::Float64, kappa_num::Float64)
-  zi = beami.z
-  zf = beamf.z
+  zi = beami.vec
+  zf = beamf.vec
 
   tilde_m = mass(beami.species) / pc_ref(beami.species, beami.beta_0)
 

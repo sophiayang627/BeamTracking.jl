@@ -38,32 +38,31 @@ end
 
 
 """
-    track!(beamf::Beam, ele::Linear.Drift, beami::Beam) -> beamf
+    track!(beam::Beam, ele::Linear.Drift) -> beam
 
 Routine to tracking through a drift using the  approximation and 
 including higher-order energy effects. 
 
 ### Arguments
+- `beam` -- Input/output beam before/after tracking through
 - `ele`   -- `Drift` type element
-- `beamf` -- Output beam after tracking through
-- `beami` -- Input beam before tracking through
 """
-function track!(beamf::Beam, ele::Linear.Drift, beami::Beam)
-  @assert !(beamf === beami) "Aliasing beamf === beami not allowed!"
+function track!(beam::Beam, ele::Linear.Drift)
   L = ele.L
-  zi = beami.z
-  zf = beamf.z
+  v = beam.v
   
+  gamma_ref = sr_gamma(beam.beta_gamma_ref)
+
   @FastGTPSA! begin
-  @. zf.x  = zi.x + zi.px * L
-  @. zf.px = zi.px
-  @. zf.y  = zi.y + zi.py * L
-  @. zf.py = zi.py
-  @. zf.z  = zi.z + zf.pz * L
-  @. zf.pz = zi.pz 
+  @. v.x  = v.x + v.px * L
+  @. v.px = v.px
+  @. v.y  = v.y + v.py * L
+  @. v.py = v.py
+  @. v.z  = v.z + v.pz*L/gamma_ref^2
+  @. v.pz = v.pz 
   end
   
-  return beamf
+  return beam
 end
 
 
@@ -72,12 +71,12 @@ Routine to linearly tracking through a quadrupole
 """
 function track!(beamf::Beam, ele::Linear.Quadrupole, beami::Beam)
   @assert !(beamf === beami) "Aliasing beamf === beami not allowed!"
-  zi = beami.z
-  zf = beamf.z
+  zi = beami.vec
+  zf = beamf.vec
   L = ele.L
   q = chargeof(beami.species)
 
-  k1 = ele.B1 / brho(massof(beami.species),beami.beta_gamma_0,q) #quadrupole strengh
+  k1 = ele.B1 / brho(massof(beami.species),beami.beta_gamma_ref,q) #quadrupole strengh
 
   k = sqrt(abs(k1))
 
@@ -121,13 +120,13 @@ Routine to linearly tracking through a Sector Magnet
 """
 function track!(beamf::Beam, ele::Linear.SBend, beami::Beam)
   @assert !(beamf === beami) "Aliasing beamf === beami not allowed!"
-  zi = beami.z
-  zf = beamf.z
+  zi = beami.vec
+  zf = beamf.vec
   L = ele.L
   q = chargeof(beami.species)
 
   #curvature of B field
-  k = ele.B0 / brho(massof(beami.species),beami.beta_gamma_0,q)
+  k = ele.B0 / brho(massof(beami.species),beami.beta_gamma_ref,q)
   kl = k * L
 
 
@@ -147,11 +146,11 @@ Routine to linearly tracking through a Combined Magnet
 """
 function track!(beamf::Beam, ele::Linear.Combined, beami::Beam)
   @assert !(beamf === beami) "Aliasing beamf === beami not allowed!"
-  zi = beami.z
-  zf = beamf.z
+  zi = beami.vec
+  zf = beamf.vec
   L = ele.L
   
-  brho = brho(massof(beami.species),beami.beta_gamma_0,q)
+  brho = brho(massof(beami.species),beami.beta_gamma_ref,q)
   ka = ele.B0 / brho #curvature
   k1 =  ele.B1 / brho #quad strength
 
