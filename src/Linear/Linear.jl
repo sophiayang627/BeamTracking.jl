@@ -40,12 +40,11 @@ end
 """
     track!(beam::Beam, ele::Linear.Drift) -> beam
 
-Routine to tracking through a drift using the  approximation and 
-including higher-order energy effects. 
+Track through a linear drift.
 
 ### Arguments
 - `beam` -- Input/output beam before/after tracking through
-- `ele`  -- `Drift` type element
+- `ele`  -- `Linear.Drift` type element
 """
 function track!(beam::Beam, ele::Linear.Drift)
   L = ele.L
@@ -61,6 +60,8 @@ function track!(beam::Beam, ele::Linear.Drift)
   @. v.z  = v.z + v.pz*L/gamma_ref^2
   @. v.pz = v.pz 
   end
+
+  # Spin unchanged
   
   return beam
 end

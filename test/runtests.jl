@@ -9,19 +9,18 @@ using Test,
     tol = 1e-14
     d = Descriptor(6, 1) # 6 variables, order 1
     beam = Beam(d, beta_gamma_ref=1.0) # Creates Beam as identity map using GTPSA Descriptor
-    
-    # gamma_ref = sqrt(2) for beta_gamma_ref = 1.0
-
-    drift = Linear.Drift(L=5.0)
+    gamma_ref = sr_gamma(beam.beta_gamma_ref)
+    L_d = 5.0
+    drift = Linear.Drift(L=L_d)
     track!(beam, drift)
 
-    p = Particle(beam, 1) # Converts SoA to AoS
+    p = Particle(beam, 1) # Converts SoA to 1 struct
     
-    M_drift_expected = [1.0  5.0  0.0  0.0  0.0  0.0;
+    M_drift_expected = [1.0  L_d  0.0  0.0  0.0  0.0;
                         0.0  1.0  0.0  0.0  0.0  0.0;
-                        0.0  0.0  1.0  5.0  0.0  0.0;
+                        0.0  0.0  1.0  L_d  0.0  0.0;
                         0.0  0.0  0.0  1.0  0.0  0.0;
-                        0.0  0.0  0.0  0.0  1.0  2.5;
+                        0.0  0.0  0.0  0.0  1.0  L_d/gamma_ref^2;
                         0.0  0.0  0.0  0.0  0.0  1.0]
     
     # 1) Correctness:
