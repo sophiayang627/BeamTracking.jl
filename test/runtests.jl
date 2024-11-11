@@ -54,13 +54,13 @@ end
   # Linear Quadrupole test:
   # Focusing:
   L_q = 1.2
-  K1n = 0.36
-  B1 = K1n*brho_ref
-  qf = Linear.Quadrupole(B1=B1,L=L_q)
-  M_qf_x = [cos(sqrt(K1n)*L_q)            sincu(sqrt(K1n)*L_q)*L_q;  
-            -sqrt(K1n)*sin(sqrt(K1n)*L_q) cos(sqrt(K1n)*L_q)      ;]
-  M_qf_y = [cosh(sqrt(K1n)*L_q)           sinhcu(sqrt(K1n)*L_q)*L_q; 
-            sqrt(K1n)*sinh(sqrt(K1n)*L_q) cosh(sqrt(K1n)*L_q)      ;]
+  Kn1 = 0.36
+  Bn1 = Kn1*brho_ref
+  qf = Linear.Quadrupole(Bn1=Bn1,L=L_q)
+  M_qf_x = [cos(sqrt(Kn1)*L_q)            sincu(sqrt(Kn1)*L_q)*L_q;  
+            -sqrt(Kn1)*sin(sqrt(Kn1)*L_q) cos(sqrt(Kn1)*L_q)      ;]
+  M_qf_y = [cosh(sqrt(Kn1)*L_q)           sinhcu(sqrt(Kn1)*L_q)*L_q; 
+            sqrt(Kn1)*sinh(sqrt(Kn1)*L_q) cosh(sqrt(Kn1)*L_q)      ;]
   M_qf_z = [1.0 L_q/gamma_ref^2;
             0.0 1.0            ;] 
   M_qf_expected = zeros(6,6)
@@ -71,7 +71,7 @@ end
   test_matrix(qf, 1, M_qf_expected, beta_gamma_ref=beta_gamma_ref, species=species)
 
   # Defocusing:
-  qd = Linear.Quadrupole(B1=-B1,L=L_q)
+  qd = Linear.Quadrupole(Bn1=-Bn1,L=L_q)
   M_qd_expected = zeros(6,6)
   M_qd_expected[1:2,1:2] = M_qf_y
   M_qd_expected[3:4,3:4] = M_qf_x

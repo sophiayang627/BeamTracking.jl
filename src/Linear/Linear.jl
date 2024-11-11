@@ -5,27 +5,41 @@ using ..BeamTracking
 using ..BeamTracking: get_work
 export track!
 
+"""
+    struct Linear.Drift{T}
+  
+## Fields
+• `L` -- Drift length / m \\
+"""
 Base.@kwdef struct Drift{T}
-  L::T
+  L::T  # drift length / m
 end
 
+"""
+    struct Linear.Quadrupole{T}
+
+## Fields
+• `L`  -- Quadrupole length / m \\
+• `Bn1` -- Quadrupole gradient / (T·m^-1)
+"""
 Base.@kwdef struct Quadrupole{T}
-  B1::T 
-  L::T  
+  L::T   # quadrupole length / m
+  Bn1::T  # quadrupole gradient / (T·m^-1)
 end
+
 
 Base.@kwdef struct SBend{T}
-  L::T    # Arc length
-  B0::T   # Field strength
-  g::T    # Coordinate system curvature through element
-  e1::T   # Edge 1
-  e2::T   # Edge 2
+  L::T   # arc length / m
+  B0::T  # field strength / T
+  g::T   # coordinate system curvature through element / m^-1
+  e1::T  # edge 1 angle / rad
+  e2::T  # edge 2 angle / rad
 end
 
 Base.@kwdef struct Combined{T}
   L::T 
   B0::T 
-  B1::T
+  Bn1::T
   g::T
   e1::T
   e2::T
@@ -37,15 +51,6 @@ Base.@kwdef struct Solenoid{T}
 end
 
 
-"""
-    track!(beam::Beam, ele::Linear.Drift) -> beam
-
-Track through a linear drift.
-
-### Arguments
-- `beam` -- Input/output beam before/after tracking through
-- `ele`  -- `Linear.Drift` type element
-"""
 function track!(beam::Beam, ele::Linear.Drift; work=get_work(beam, Val{0}()))
   L = ele.L
   v = beam.v
@@ -68,11 +73,11 @@ function track!(beam::Beam, ele::Linear.Quadrupole; work=get_work(beam, Val{1}()
   v = beam.v
   L = ele.L
 
-  K1n = ele.B1 / brho(massof(beam.species), beam.beta_gamma_ref, chargeof(beam.species))
+  Kn1 = ele.Bn1 / brho(massof(beam.species), beam.beta_gamma_ref, chargeof(beam.species))
   gamma_ref = sr_gamma(beam.beta_gamma_ref)
 
-  if K1n >= 0
-    k = sqrt(K1n)
+  if Kn1 >= 0
+    k = sqrt(Kn1)
     kL = k*L
     sx  = sin(kL)
     cx  = cos(kL)
@@ -82,7 +87,7 @@ function track!(beam::Beam, ele::Linear.Quadrupole; work=get_work(beam, Val{1}()
     syc = sinhcu(kL)
     sgn = 1
   else
-    k = sqrt(-K1n)
+    k = sqrt(-Kn1)
     kL = k*L
     sx  = sinh(kL)
     cx  = cosh(kL)
@@ -106,7 +111,6 @@ function track!(beam::Beam, ele::Linear.Quadrupole; work=get_work(beam, Val{1}()
 
   @. v.z      = v.z + L/gamma_ref^2*v.pz
   end 
- 
 
   return beam
 end 
@@ -148,7 +152,7 @@ function track!(beamf::Beam, ele::Linear.Combined, beami::Beam)
   
   brho = brho(massof(beami.species),beami.beta_gamma_ref,q)
   ka = ele.B0 / brho #curvature
-  k1 =  ele.B1 / brho #quad strength
+  k1 =  ele.Bn1 / brho #quad strength
 
   K = ka^2 + k1
 

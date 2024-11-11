@@ -5,103 +5,127 @@ using ..BeamTracking
 using ..BeamTracking: get_work
 export track!
 
-struct Drift{T}
-  L::T
+Base.@kwdef struct Drift{T}
+  L::T  # drift length / m
 end
 
-struct Quadrupole{T}
-  L::T
-  B1::T
+Base.@kwdef struct Quadrupole{T}
+  L::T   # quadrupole length / m
+  Bn1::T  # quadrupole gradient / (T·m^-1)
 end
 
-"""
-    track!(beamf::Beam, ele::Drift, beami::Beam) -> beamf
 
-This function performs exact, hence symplectic, tracking of a `Beam` through a drift.
-
-### Arguments
-  - `beamf` -- Output `Beam`
-  - `ele`    -- `Drift`-type element
-  - `beami` -- Input `Beam`
-"""
-function track!(beamf::Beam, ele::Drift, beami::Beam)
-  @assert !(beamf === beami) "Aliasing beamf === beami not allowed!"
-  @assert !(beamf.species === beami.species) "Input species must be equal to output!"
+function track!(beam::Beam, ele::MatrixKick.Drift; work=get_work(beam, Val{1}()))
   L = ele.L
-  zi = beami.vec
-  zf = beamf.vec
+  v = beam.v
 
-  tilde_m = mass(beami.species) / pc_ref(beami.species, beami.beta_0)
+  tilde_m = 1 / beam.beta_gamma_ref
+  beta_ref = sr_beta(beam.beta_gamma_ref)
 
-  @. ps = sqrt((1.0 + zi.pz)^2 - zi.px^2 - zi.py^2)
-  @. et = sqrt((1.0 + zi.pz)^2 + tilde_m^2)
-  @. zf.x = zi.x + zi.px * L / ps
-  @. zf.px = zi.px
-  @. zf.y = zi.y + zi.py * L / ps
-  @. zf.py = zi.py
-  @. zf.z = zi.z - (1.0 + zi.pz) * (L / ps - L / (beami.beta_0 * et))
-  @. zf.pz = zi.pz
+  @FastGTPSA! begin
+  @. work[1] = 1 / sqrt((1.0 + v.pz)^2 - (v.px^2 + v.py^2))
+  @. v.x  .= v.x + v.px * L * work[1]
+  @. v.y  .= v.y + v.py * L * work[1]
+  @. v.z  .= v.z - (1.0 + v.pz) * (L * work[1] - L / (beta_ref * sqrt((1.0 + v.pz)^2 + tilde_m^2)))
+  end
 
-  return beamf
-end # function track!(::Drift, ::Beam, ::Beam)
+  # Spin unchanged
+
+  return beam
+end # function track!(::Beam, ::Drift)
 
 
-"""
-track quadrupole
-"""
-function track!(beamf::Beam, ele::Quadrupole, beami::Beam)
+
+# This integrator uses the so-called Matrix-Kick-Matrix method to implement
+# an integrator accurate though second-order in the integration step-size.
+function track!(beam::Beam, ele::MatrixKick.Quadrupole; work=get_work(beam, Val{6}()))
   @assert !(beamf === beami) "Aliasing beamf === beami not allowed!"
   L = ele.L
-  zi = beami.vec
-  zf = beamf.vec
 
-  tilde_m = massof(ele.species_ref) / ele.pc_ref
-  β0 = ele.pc_ref / ele.E_tot_ref
+  # κ^2 (kappa-squared) := (q g / P0) / (1 + δ)
+  # numerator of κ^2
+  k2_num = Bn1 / brho(massof(beam.species), beam.beta_gamma_ref, chargeof(beam.species))
 
-  @. ps = sqrt((1.0 + zi.pz)^2 - zi.px^2 - zi.py^2)
-  @. et = sqrt((1.0 + zi.pz)^2 + tilde_m^2)
-  @. zf.x = zi.x + zi.px * L / ps
-  @. zf.px = zi.px
-  @. zf.y = zi.y + zi.py * L / ps
-  @. zf.py = zi.py
-  @. zf.z = zi.z - (1.0 + zi.pz) * (L / ps - L / (β0 * et))
-  @. zf.pz = zi.pz
+  v = beam.v
+  v_work = StructArray{Coord{eltype(work[1])}}((work[1], work[2], work[3], work[4], work[5], work[6]))
 
-  return beamf
+  trackQuadMx!(v_work, v, k2_num, L / 2)
+  trackQuadK!( v, v_work, L)
+  trackQuadMx!(v_work, v, k2_num, L / 2)
+
+
+  v .= v_work
+
+  return beam
 end # function track!(::Quadrupole)
 
+
 """
+    trackQuadMx!(beamf::Beam, beami::Beam, k2_num::Float64, s::Float64)
+
 track "matrix part" of quadrupole
 """
-function trackQuadMf!(beamf::Beam, beami::Beam, s::Float64, kappa_num::Float64)
-  zi = beami.vec
-  zf = beamf.vec
+function trackQuadMx!(vf, vi, k2_num, s)
+  focus   = k2_num >= 0  # horizontally focusing
+  defocus = k2_num <  0  # horizontally defocusing
 
-  tilde_m = mass(beami.species) / pc_ref(beami.species, beami.beta_0)
+  p = @. 1 + vi.pz    # reduced momentum, P/P0 = 1 + δ
+  k2 = @. k2_num / p  # κ^2 for each particle
+  ks = @. sqrt(abs(k2)) * s  # |κ|s
+  xp = @. v.px / p  # x'
+  yp = @. v.py / p  # y'
 
-  p_red = 1 + zi.pz # reduced Pz
+  cx =  @. focus * cos(ks)    + defocus * cosh(ks)
+  cy =  @. focus * cosh(ks)   + defocus * cos(ks)
+  sx =  @. focus * sincu(ks)  + defocus * sinhc(ks)
+  sy =  @. focus * sinhc(ks)  + defocus * sincu(ks)
+  sx2 = @. focus * sincu(2ks) + defocus * sinhc(2ks)
+  sy2 = @. focus * sinhc(2ks) + defocus * sincu(2ks)
+  sxz = @. focus * sin(ks)^2  + defocus * sinh(ks)^2
+  syz = @. focus * sinh(ks)^2 + defocus * sin(ks)^2
 
-  κ = kappa_num / p_red
-  κs = κ * s
-  cx = (cos(κs) * (k1 >= 0) + cosh(ks)*(k1 < 0))
-  sx = sin(κs)
-  cy = cosh(κs)
-  sy = sinh(κs)
-  sx2 = sinc(2κs)
-  sy2 = sinch(2κs)
-  xp = px / p_red
-  yp = py / p_red
-  
-  @. zf.x  = zi.x * cx + xp * sx / κ
-  @. zf.px = zi.px * cx - p_red * κ * zi.x
-  @. zf.y  = zi.y * cy + yp * sy / κ
-  @. zf.py = zi.py * cy + p_red * κ * zi.y
-  @. zf.z  = (zi.z - (s / 4.) * (xp^2 * (1. + sx2) + yp^2 * (1 + sy2)
-                                  + (κ * x)^2 * (1 - sx2) + (κ * y)^2 * (1 - sy2))
-                    + (x * xp * sx^2 - y * yp * sy^2) / 2.)
-  @. zf.pz = zi.pz
+  @. vf.x  = vi.x  * cx + xp * s * sx
+  @. vf.px = vi.px * cx - k2 * p * vi.x * s * sx
+  @. vf.y  = vi.y  * cy + yp * s * sy
+  @. vf.py = vi.py * cy + k2 * p * vi.y * s * sy
+  @. vf.z  = (vi.z - (s / 4) * (xp^2 * (1 + sx2) + yp^2 * (1 + sy2)
+                                + k2 * vi.x^2 * (1 - sx2) - k2 * vi.y^2 * (1 - sy2))
+                   + (vi.x * xp * sxz - vi.y * yp * syz) / 2.)
+  @. vf.pz = vi.pz
 
-  return beamf
+  return vf
+end # function trackQuadMx
+
+
+"""
+    trackQuadK!(vf, vi, s::Float64)
+
+track "remaining part" of quadrupole, a position kick
+
+### Implementation
+A common factor that appears in the expressions for `zf.x` and `zf.y`
+originally included a factor with the generic form ``1 - \\sqrt{1 - A}``,
+which suffers a loss of precision when ``|A| \\ll 1``. To combat that
+problem, we rewrite it in the form ``A / (1 + \\sqrt{1-A})``---more
+complicated, yes, but far more accurate.
+"""
+function trackQuadK!(vf, vi, s)
+  tilde_m = 1 / beami.beta_gamma_ref  # mc^2 / p0·c
+  beta_ref = sr_beta(beami.beta_gamma_ref)
+
+  p    = @. 1 + vi.pz  # reduced momentum, P/P0 = 1 + δ
+  ptr2 = @. px^r + py^2
+  ps   = @. sqrt(p^2 - ptr2)
+
+  @. vf.x  = vi.x + s * vi.px / p * ptr2 / (ps * (p + ps))
+  @. vf.y  = vi.y + s * vi.py / p * ptr2 / (ps * (p + ps))
+  @. vf.z  = vi.z - s * (p / ps - (1/2) * ptr2 / p^2
+                         - p / (beta_ref * sqrt(p^2 + tilde_m^2)))
+  @. vf.px = vi.px
+  @. vf.py = vi.py
+  @. vf.pz = vi.pz
+
+  return vf
 end # function trackQ!M::Quadrupole()
 
 

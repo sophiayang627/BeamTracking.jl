@@ -116,7 +116,6 @@ end
 #  return sr_pc(e_rest, e_kin) / (ne * clight)
 #end
 
-
 """
     sincu(z)
 
@@ -148,7 +147,6 @@ function sincu(z::Number)
   end
 end
 
-
 """
     sinhcu(z)
 
@@ -173,5 +171,6 @@ sincu(z::TPS) = sinc(z/pi)
 sinhcu(z::TPS) = sinhc(z/pi)
 sincu(z::GTPSA.TempTPS) = (GTPSA.div!(z,z,pi); return GTPSA.__t_sinc(z);)
 sinhcu(z::GTPSA.TempTPS) = (GTPSA.div!(z,z,pi); return GTPSA.__t_sinhc(z);)
+
 
 
