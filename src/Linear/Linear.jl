@@ -46,7 +46,7 @@ Track through a linear drift.
 - `beam` -- Input/output beam before/after tracking through
 - `ele`  -- `Linear.Drift` type element
 """
-function track!(beam::Beam, ele::Linear.Drift)
+function track!(beam::Beam, ele::Linear.Drift; work=get_work(beam, Val{0}()))
   L = ele.L
   v = beam.v
   
