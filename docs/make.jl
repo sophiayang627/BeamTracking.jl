@@ -8,6 +8,10 @@ makedocs(;
   pages = 
   [
     "Home" => "index.md",
+    "Submodules" => ["linear.md",
+                     "matrixkick.md",
+                     "misc.md"],
+    "Developer's Guide" => "devel.md"
   ]
 )
 

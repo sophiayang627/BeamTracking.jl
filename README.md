@@ -4,6 +4,7 @@
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://bmad-sim.github.io/BeamTracking.jl/dev/)
 [![Build Status](https://github.com/bmad-sim/BeamTracking.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/bmad-sim/BeamTracking.jl/actions/workflows/CI.yml?query=branch%3Amain)
 
+This package provides routines for simulating charged particle beams. 
 
 To develop this package:
 
@@ -16,9 +17,6 @@ If working on your own fork, replace `bmad-sim` in the above `develop` url with 
 
 In your `~/.julia/dev/` directory, you will now see the directory `BeamTracking`. This is the Github repo where you can do your work and push changes.
 
-If you would like to add a dependency to the project (e.g. [`OrdinaryDiffEq.jl`](https://github.com/SciML/OrdinaryDiffEq.jl)), you should:
+See the [development documentation](https://bmad-sim.github.io/BeamTracking.jl/dev/) for more details.
 
-1. In the `~/.julia/dev/BeamTracking.jl` directory, start `julia`
-2. Enter package-mode using `]`, and then type `activate .`. This activates the `Project.toml` in the current directory you're in
-3. In package-mode, type `add OrdinaryDiffEq`. This will add the package as a dependency to the `Project.toml`.
-4. In the main module `src/BeamTracking.jl`, add a `using OrdinaryDiffEq` to the top of `BeamTracking.jl`, and in your particularly module defined below add a `using ..OrdinaryDiffEq` which basically says, go one module level up and get `OrdinaryDiffEq`.
+
