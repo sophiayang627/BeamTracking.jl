@@ -2,7 +2,7 @@ module Linear
 using ..GTPSA: @FastGTPSA!, GTPSA
 import ..BeamTracking: track!
 using ..BeamTracking
-
+using ..BeamTracking: get_work
 export track!
 
 Base.@kwdef struct Drift{T}
@@ -10,8 +10,8 @@ Base.@kwdef struct Drift{T}
 end
 
 Base.@kwdef struct Quadrupole{T}
-  L::T
-  B1::T
+  B1::T 
+  L::T  
 end
 
 Base.@kwdef struct SBend{T}
@@ -40,12 +40,11 @@ end
 """
     track!(beam::Beam, ele::Linear.Drift) -> beam
 
-Routine to tracking through a drift using the  approximation and 
-including higher-order energy effects. 
+Track through a linear drift.
 
 ### Arguments
 - `beam` -- Input/output beam before/after tracking through
-- `ele`  -- `Drift` type element
+- `ele`  -- `Linear.Drift` type element
 """
 function track!(beam::Beam, ele::Linear.Drift)
   L = ele.L
@@ -54,65 +53,62 @@ function track!(beam::Beam, ele::Linear.Drift)
   gamma_ref = sr_gamma(beam.beta_gamma_ref)
 
   @FastGTPSA! begin
-  @. v.x  = v.x + v.px * L
-  @. v.px = v.px
-  @. v.y  = v.y + v.py * L
-  @. v.py = v.py
-  @. v.z  = v.z + v.pz*L/gamma_ref^2
-  @. v.pz = v.pz 
+  @. v.x  = v.x + L*v.px
+  @. v.y  = v.y + L*v.py
+  @. v.z  = v.z + L/gamma_ref^2*v.pz
   end
+
+  # Spin unchanged
   
   return beam
 end
 
 
-"""
-Routine to linearly tracking through a quadrupole
-"""
-function track!(beamf::Beam, ele::Linear.Quadrupole, beami::Beam)
-  @assert !(beamf === beami) "Aliasing beamf === beami not allowed!"
-  zi = beami.vec
-  zf = beamf.vec
+function track!(beam::Beam, ele::Linear.Quadrupole; work=get_work(beam, Val{1}()))
+  v = beam.v
   L = ele.L
-  q = chargeof(beami.species)
 
-  k1 = ele.B1 / brho(massof(beami.species),beami.beta_gamma_ref,q) #quadrupole strengh
+  K1n = ele.B1 / brho(massof(beam.species), beam.beta_gamma_ref, chargeof(beam.species))
+  gamma_ref = sr_gamma(beam.beta_gamma_ref)
 
-  k = sqrt(abs(k1))
-
-  kl = k * L
-  greater = k1 >= 0.0 #horizontal focusing
-  smaller = k1 < 0.0 #horizontal defocusing 
-  
-
-  if greater
-    #horizontal focusing
-    cx = cos(kl)
-    sx = sin(kl)
-    sxc = sincu(kl)
-    cy = cosh(kl)
-    sy = sinh(kl)
-    syc = sinhc(kl)
+  if K1n >= 0
+    k = sqrt(K1n)
+    kL = k*L
+    sx  = sin(kL)
+    cx  = cos(kL)
+    sxc = sincu(kL)
+    sy  = sinh(kL)
+    cy  = cosh(kL)
+    syc = sinhcu(kL)
+    sgn = 1
   else
-     #horizontal defocusing
-     cx = cosh(kl)
-     sx = sinh(kl)
-     sxc = sinhc(kl)
-     cy = cos(kl)
-     sy = sin(kl)
-     syc = sincu(kl)
+    k = sqrt(-K1n)
+    kL = k*L
+    sx  = sinh(kL)
+    cx  = cosh(kL)
+    sxc = sinhcu(kL)
+    sy  = sin(kL)
+    cy  = cos(kL)
+    syc = sincu(kL)
+    sgn = -1
   end
 
+  
+  # Note: 0+work[1] is workaround for GTPSA @FastGTPSA! bug
   @FastGTPSA! begin
-  @. zf.x  = zi.x * cx + zi.px * sxc * L
-  @. zf.px = (-1 * (greater) + 1 * (smaller)) * zi.x * k * sx + zi.px * cx
-  @. zf.y = zi.y * cy + zi.py * syc * L 
-  @. zf.py = (1 * (greater) - 1 * (smaller)) * zi.y * k * sy + zi.py * cy
-  @. zf.z = zi.z + zi.pz * L 
-  @. zf.pz = zi.pz
-  end 
+  @. work[1]  = cx*v.x + sxc*L*v.px
+  @. v.px     = -sgn*k*sx*v.x + cx*v.px
+  @. v.x      = 0+work[1] 
 
-  return beamf
+  @. work[1]  = cy*v.y + syc*L*v.py
+  @. v.py     = sgn*k*sy*v.y + cy*v.py
+  @. v.y      = 0+work[1] 
+
+  @. v.z      = v.z + L/gamma_ref^2*v.pz
+  end 
+ 
+
+  return beam
 end 
 
 """
