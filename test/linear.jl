@@ -9,10 +9,10 @@ using GTPSA
   #drift
   drift_ele = Linear.Drift(L=0.50)
   #Quadrupole
-  quad_ele1 = Linear.Quadrupole(L=0.4, B1 = 0.0020) #positive B1, quad defocusing for e-
-  quad_ele2 = Linear.Quadrupole(L=0.4, B1 = -0.0020) #negative B1, quad focusing for e-
-  quad_ele3 = Linear.Quadrupole(L=0.4, B1 = 2.0) #big B1
-  quad_ele4 = Linear.Quadrupole(L=0.4, B1 = 0.0) #no strength, same as drift
+  quad_ele1 = Linear.Quadrupole(L=0.4, Bn1 = 0.0020) #positive Bn1, quad defocusing for e-
+  quad_ele2 = Linear.Quadrupole(L=0.4, Bn1 = -0.0020) #negative Bn1, quad focusing for e-
+  quad_ele3 = Linear.Quadrupole(L=0.4, Bn1 = 2.0) #big Bn1
+  quad_ele4 = Linear.Quadrupole(L=0.4, Bn1 = 0.0) #no strength, same as drift
 
   #Sbend
   #sb_ele1 = Linear.SBend(L = 1.5, B0 = 0.000446) # positive field
@@ -38,7 +38,7 @@ using GTPSA
 
 
   #Quad Defocusing for electron
-  track!(bf_q1, quad_ele1, bi) # Positive B1
+  track!(bf_q1, quad_ele1, bi) # Positive Bn1
   @test !(bf_q1 == bi)
   par_q1 = Particle(bf_q1)
   mat_q1 = GTPSA.jacobian(par_q1.z)
@@ -46,7 +46,7 @@ using GTPSA
   show(stdout, "text/plain", mat_q1)
 
   #Quad Focusing 
-  track!(bf_q2, quad_ele2, bi) # negative B1
+  track!(bf_q2, quad_ele2, bi) # negative Bn1
   @test !(bf_q2 == bi)
   par_q2 = Particle(bf_q2)
   mat_q2 = GTPSA.jacobian(par_q2.z)
@@ -54,7 +54,7 @@ using GTPSA
   show(stdout, "text/plain", mat_q2)
 
   #Large k, defocusing
-  track!(bf_q3, quad_ele3, bi) # negative B1
+  track!(bf_q3, quad_ele3, bi) # negative Bn1
   @test !(bf_q3 == bi)
   par_q3 = Particle(bf_q3)
   mat_q3 = GTPSA.jacobian(par_q3.z)
@@ -62,15 +62,15 @@ using GTPSA
   show(stdout, "text/plain", mat_q3)
 
   #0 strength quadrupole should give the same result as a drift
-  track!(bf_q4, quad_ele4, bi) # negative B1
+  track!(bf_q4, quad_ele4, bi) # negative Bn1
   @test !(bf_q4 == bi)
   par_q4 = Particle(bf_q4)
   mat_q4 = GTPSA.jacobian(par_q4.z)
-  println("\n","quad with B1=0, simplify to drift")
+  println("\n","quad with Bn1=0, simplify to drift")
   show(stdout, "text/plain", mat_q4)
 
   #Sbend
-  # track!(sb_ele1, bf_s1, bi) # negative B1
+  # track!(sb_ele1, bf_s1, bi) # negative Bn1
   #  @test !(bf_s1 == bi)
   #  par_s1 = Particle(bf_s1)
   #  mat_s1 = GTPSA.jacobian(par_s1.z)

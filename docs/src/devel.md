@@ -16,8 +16,8 @@ For example, using the `Linear.Drift` and `Linear.Quadrupole` elements:
 
 ```julia
 d = Linear.Drift(L=0.2)
-qf = Linear.Quadrupole(B1=-18.5, L=0.5)
-qd = Linear.Quadrupole(B1=18.5, L=0.5)
+qf = Linear.Quadrupole(Bn1=-18.5, L=0.5)
+qd = Linear.Quadrupole(Bn1=18.5, L=0.5)
 
 fodo = (qf, d, qd, d)
 

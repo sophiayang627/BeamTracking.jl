@@ -41,7 +41,7 @@ export Beam,
 include("types.jl")
 
 # Empty tracking method to be imported by submodules 
-track!(beam::Beam, ::Nothing) = beam
+track!(beam::Beam, ::Nothing; work=nothing) = beam
 
 # --------------------------------------------------
 

@@ -57,6 +57,8 @@ beamf1 = Beam(e_minus, bg1, zf1)
   #      beamf.z == [ x_f, px_f, y_f, py_f, z_f, pz_f ]
 
   # quadrupole
+#  @test norm(zf1.z - beamf1.v.z) < tol
+
 
 end
 
