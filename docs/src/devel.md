@@ -8,7 +8,7 @@ The entire package is centered around one single `track!` function, which has th
 track!(beam::Beam, element, work=work)
 ```
 
-Here, `beam` is a `Beam` struct, which is described in detail [below](@ref Beam). `element` is some element which to track the beam through, and `work` is an optional tuple of the minimal number of temporaries needed for use inside the tracking function (for some elements, it is an empty tuple). 
+Here, `beam` is a `Beam` struct, which is described in detail [below](@ref beam). `element` is some element which to track the beam through, and `work` is an optional tuple of the minimal number of temporaries needed for use inside the tracking function (for some elements, it is an empty tuple). 
 
 After calling `track!`, the `beam` struct is mutated to contain the particle phase space coordinates (and possiblly spin transport quaternions) after propagation through the `element`. With this `track!` function, all one needs to do is define their own custom `element` type, and then when looping through a vector of elements, Julia's multiple dispatch will take care of each particular element.
 
@@ -27,7 +27,7 @@ for ele in fodo
 end
 ```
 
-## [The `Beam` Struct](@id Beam)
+## [The `Beam` Struct](@id beam)
 
 The `Beam` struct contains the following fields:
 
