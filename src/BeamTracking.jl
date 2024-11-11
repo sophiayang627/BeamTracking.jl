@@ -11,7 +11,7 @@ include("aapc.jl")
 
 export Beam,       
        Coord, 
-       Quaternion
+       Quaternion,
        Particle,
        
        MatrixKick,
@@ -30,7 +30,7 @@ export Beam,
        Species,
 
        sincu,
-       sinhc,
+       sinhcu,
 
        track!
 
@@ -46,11 +46,12 @@ track!(beam::Beam, ::Nothing) = beam
 # --------------------------------------------------
 
 include("utils.jl")
+include("work.jl")
 
 # Modules separated:
 include("MatrixKick/MatrixKick.jl") 
 include("Linear/Linear.jl")   
-#include("Misc/Misc.jl")
+include("Misc/Misc.jl")
 
 
 end

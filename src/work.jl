@@ -9,13 +9,13 @@ length `length(Beam.v.x)` which may be used as temporaries.
 - `::Val{N}` -- Number of `N` temporary arrays desired
 """
 function get_work(beam::Beam, ::Val{N}) where {N}
-  sample = one(beam.v.x)
+  sample = first(beam.v.x)
   T = typeof(sample)
-  N_particle = length(Beam.v.x)
+  N_particle = length(beam.v.x)
 
   # Instead of using zeros, we do this to ensure 
   # same GTPSA descriptor if T isa TPS.
-  return ntuple(Val{N}()) do
+  return ntuple(Val{N}()) do t
     r = Vector{T}(undef, N_particle)
     for idx in eachindex(r)
       r[idx] = zero(sample)

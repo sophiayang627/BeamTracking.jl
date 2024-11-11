@@ -2,7 +2,7 @@ module MatrixKick
 using ..GTPSA: @FastGTPSA!, GTPSA
 import ..BeamTracking: track!
 using ..BeamTracking
-
+using ..BeamTracking: get_work
 export track!
 
 struct Drift{T}
