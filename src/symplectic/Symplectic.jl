@@ -22,13 +22,13 @@ end
 This function performs exact, hence symplectic, tracking of a `Beam` through a drift.
 
 ### Arguments
-  - `ele`   -- element of type `Symplectic.Drift`
   - `beamf` -- final `Beam`
+  - `ele`   -- element of type `Symplectic.Drift`
   - `beami` -- initial `Beam`
 """
-function track!(ele::Drift, beamf::Beam, beami::Beam)
+function track!(beamf::Beam, ele::Symplectic.Drift, beami::Beam)
   @assert !(beamf === beami) "Aliasing beamf === beami not allowed!"
-  @assert !(beamf.species === beami.species) "Input species must be equal to output!"
+  @assert (beamf.species == beami.species) "Input and output species must be equal!"
   L = ele.L
   zi = beami.z
   zf = beamf.z
@@ -39,34 +39,34 @@ function track!(ele::Drift, beamf::Beam, beami::Beam)
   @. ps = sqrt((1.0 + zi.pz)^2 - (zi.px^2 + zi.py^2))
   @. et = sqrt((1.0 + zi.pz)^2 + tilde_m^2)
 
-  @. zf.x = zi.x + zi.px * L / ps
-  @. zf.px = zi.px
-  @. zf.y = zi.y + zi.py * L / ps
-  @. zf.py = zi.py
-  @. zf.z = zi.z - (1.0 + zi.pz) * (L / ps - L / (beta_0 * et))
-  @. zf.pz = zi.pz
+  @. zf.x  .= zi.x + zi.px * L / ps
+  @. zf.px .= zi.px
+  @. zf.y  .= zi.y + zi.py * L / ps
+  @. zf.py .= zi.py
+  @. zf.z  .= zi.z - (1.0 + zi.pz) * (L / ps - L / (beta_0 * et))
+  @. zf.pz .= zi.pz
 
   return beamf
-end # function track!(::Drift, ::Beam, ::Beam)
+end # function track!(::Beam, ::Drift, ::Beam)
 
 
 """
-    track!(ele::Quadrupole, beamf::Beam, beami::Beam)
+    track!(beamf::Beam, ele::Quadrupole, beami::Beam)
 
 ## Description
 track quadrupole
 
 
 ### Arguments`
-  - `ele`   -- element of type `Symplectic.Quadrupole`
   - `beamf` -- final `Beam`
+  - `ele`   -- element of type `Symplectic.Quadrupole`
   - `beami` -- initial `Beam`
 
 ### Implementation
 This integrator uses the so-called Matrix-Kick-Matrix method to implement
 an integrator accurate though second-order in the integration step-size.
 """
-function track!(ele::Symplectic.Quadrupole, beamf::Beam, beami::Beam)
+function track!(beamf::Beam, ele::Symplectic.Quadrupole, beami::Beam)
   @assert !(beamf === beami) "Aliasing beamf === beami not allowed!"
   L = ele.L
 

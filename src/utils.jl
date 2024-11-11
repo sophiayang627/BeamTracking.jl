@@ -168,5 +168,6 @@ function sinhc(z::Number)
 end
 
 export sincu,
-       sinhc
+       sinhc,
+       sr_beta
 
