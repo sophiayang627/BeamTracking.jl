@@ -16,6 +16,7 @@ function sr_gamma(beta_gamma)
 end
 
 
+
 """
     sr_gamma_m1(beta_gamma)
 
@@ -81,10 +82,8 @@ For a particle with a given rest energy and relativistic parameter
 DTA: Need to handle energy units other than ``\\mathrm{eV}``..
 """
 function brho(e_rest, beta_gamma, ne = 1)
-  return sr_pc(e_rest, beta_gamma) / (ne * clight)
+  return (sr_pc(e_rest, beta_gamma) / (ne * c_light))
 end
-
-
 ## If given ``E_\text{kin}`` instead of ``\beta\gamma``,
 ## use the following:
 #
@@ -149,16 +148,16 @@ function sincu(z::Number)
 end
 
 """
-    sinhc(z)
+    sinhcu(z)
 
 ## Description
-Compute the hyperbolic sinc function, ``\\operatorname{sinhc}(z) = \\operatorname{sinh}(z) / z``,
+Compute the hyperbolic sinc function, ``\\operatorname{sinhcu}(z) = \\operatorname{sinh}(z) / z``,
 with a correct treatment of the removable singularity at the origin.
 
 ### Implementation
 See sincu for notes about implementation.
 """
-function sinhc(z::Number)
+function sinhcu(z::Number)
   threshold = sqrt(2eps())
   if abs(z) < threshold
     return 1.
@@ -167,7 +166,11 @@ function sinhc(z::Number)
   end
 end
 
-export sincu,
-       sinhc,
-       sr_beta
+# These will go in GTPSA 
+sincu(z::TPS) = sinc(z/pi)
+sinhcu(z::TPS) = sinhc(z/pi)
+sincu(z::GTPSA.TempTPS) = (GTPSA.div!(z,z,pi); return GTPSA.__t_sinc(z);)
+sinhcu(z::GTPSA.TempTPS) = (GTPSA.div!(z,z,pi); return GTPSA.__t_sinhc(z);)
+
+
 

@@ -1,7 +1,8 @@
-module Symplectic
-using ..BeamTracking: Coords, Beam
-using ..GTPSA: @FastGTPSA!
-
+module MatrixKick
+using ..GTPSA: @FastGTPSA!, GTPSA
+import ..BeamTracking: track!
+using ..BeamTracking
+using ..BeamTracking: get_work
 export track!
 
 
@@ -16,7 +17,7 @@ end
 
 
 """
-    track!(ele::Symplectic.Drift, beamf::Beam, beami::Beam) -> beamf
+    track!(beamf::Beam, ele::Drift, beami::Beam) -> beamf
 
 ## Description
 This function performs exact, hence symplectic, tracking of a `Beam` through a drift.
@@ -30,8 +31,8 @@ function track!(beamf::Beam, ele::Symplectic.Drift, beami::Beam)
   @assert !(beamf === beami) "Aliasing beamf === beami not allowed!"
   @assert (beamf.species == beami.species) "Input and output species must be equal!"
   L = ele.L
-  zi = beami.z
-  zf = beamf.z
+  zi = beami.vec
+  zf = beamf.vec
 
   tilde_m = 1 / beami.beta_gamma_0
   beta_0 = sr_beta(beami.beta_gamma_0)
@@ -156,5 +157,5 @@ function trackQuadK!(beamf::Beam, beami::Beam, s::Float64)
 end # function trackQ!M::Quadrupole()
 
 
-end # module Symplectic
+end # module MatrixKick
 
