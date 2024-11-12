@@ -9,15 +9,15 @@ using GTPSA,
 
 include("aapc.jl")
 
-export Beam,       
-       Coord, 
+export Beam,
+       Coord,
        Quaternion,
        Particle,
-       
+
        MatrixKick,
        Linear,
 
-       sr_gamma, 
+       sr_gamma,
        sr_gamma_m1,
        sr_beta,
        sr_pc,
@@ -35,12 +35,9 @@ export Beam,
        track!
 
 
-
-
-
 include("types.jl")
 
-# Empty tracking method to be imported by submodules 
+# Empty tracking method to be imported by submodules
 track!(beam::Beam, ::Nothing; work=nothing) = beam
 
 # --------------------------------------------------
@@ -49,8 +46,8 @@ include("utils.jl")
 include("work.jl")
 
 # Modules separated:
-include("MatrixKick/MatrixKick.jl") 
-include("Linear/Linear.jl")   
+include("MatrixKick/MatrixKick.jl")
+include("Linear/Linear.jl")
 include("Misc/Misc.jl")
 
 
