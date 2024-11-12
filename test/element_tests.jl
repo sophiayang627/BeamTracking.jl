@@ -7,9 +7,9 @@ using Test
 l1 = 0.15
 l2 = 0.75
 l3 = 2.00
-dr1 = Symplectic.Drift(l1);
-dr2 = Symplectic.Drift(l2);
-dr3 = Symplectic.Drift(l3);
+dr1 = MatrixKick.Drift(l1);
+dr2 = MatrixKick.Drift(l2);
+dr3 = MatrixKick.Drift(l3);
 # -- quadrupoles
 
 
