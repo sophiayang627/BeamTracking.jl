@@ -30,106 +30,106 @@ struct Beam{T<:StructVector{<:Coord}, U<:Union{Nothing, StructVector{<:Quaternio
   q::U
 end
 
-# Initialize a Beam with either a single particle (scalars) 
-function Beam(; species::Species=Species("electron"), beta_gamma_ref=1.0, spin::Union{Bool,Nothing}=nothing,
+# Initialize a Beam with either a single particle (scalars)
+"""
+    Beam(; species::Species=Species("electron"), beta_gamma_ref=1.0, 
+           spin::Union{Bool,Nothing}=nothing, gtpsa_map::Union{Bool,Nothing}=nothing,
+           x::Union{Number,AbstractVector}=0.0, px::Union{Number,AbstractVector}=0.0, 
+           y::Union{Number,AbstractVector}=0.0, py::Union{Number,AbstractVector}=0.0, 
+           z::Union{Number,AbstractVector}=0.0, pz::Union{Number,AbstractVector}=0.0 )
+
+
+Initializes a `Beam`. Any of the specified phase space coordinates may be scalar `Number`s or 
+`Vector`s to store as a structure-of-arrays. Internally, all phase space coordinates are stored 
+as `Vector`s. If all phase space coordinates are scalar `Number`s, then a `Beam` is created with 
+a single particle. If any of the coordinates are specified as `Vector`s, then all other scalar-
+specified quantities are `fill`-ed as `Vector`s. For example, `Beam(x=1.0, y=[2,3])` creates a 
+beam with two particles having the phase space coordinates `[1.0, 0.0, 2.0, 0.0, 0.0, 0.0]` 
+and `[1.0, 0.0, 3.0, 0.0, 0.0, 0.0]`.
+
+## Other keyword arguments
+• `species`         -- Particle species, default is electron
+• `beta_gamma_ref`  -- Reference Lorentz beta*gammma to normalize the momenta to
+• `spin`            -- If true, spin tracking is turned on and a quaternion for each particle is tracked
+• `gtpsa_map`       -- If true, GTPSA map tracking is used for each particle using the Descriptor defined in GTPSA.desc_current
+"""
+function Beam(; species::Species=Species("electron"), beta_gamma_ref=1.0, 
+                spin::Union{Bool,Nothing}=nothing, gtpsa_map::Union{Bool,Nothing}=nothing,
                 x::Union{Number,AbstractVector}=0.0, px::Union{Number,AbstractVector}=0.0, 
                 y::Union{Number,AbstractVector}=0.0, py::Union{Number,AbstractVector}=0.0, 
-                z::Union{Number,AbstractVector}=0.0, pz::Union{Number,AbstractVector}=0.0)
+                z::Union{Number,AbstractVector}=0.0, pz::Union{Number,AbstractVector}=0.0 )
 
-  # If any of x, px, y, py, z, pz are vectors, then this will construct a Beam of many particles
-  # Else, make a single particle
-  if any(t->t isa AbstractVector, (x, px, y, py, z, pz))
-    T = promote_type(typeof(x), typeof(px), typeof(y),typeof(py), typeof(z), typeof(pz)) 
+  idx_vector = findfirst(t->t isa AbstractVector, (x, px, y, py, z, pz))
+  if isnothing(idx_vector)
+    N_particle = 1
   else
-    T = promote_type(typeof(x), typeof(px), typeof(y),typeof(py), typeof(z), typeof(pz))             
-    v = StructArray{Coord{T}}((T[x], T[px], T[y], T[py], T[z], T[pz]))
+    N_particle = length(getindex((x, px, y, py, z, pz), idx_vector))
+  end
+
+  T1 = promote_type(eltype(x), eltype(px), eltype(y),eltype(py), eltype(z), eltype(pz)) 
+  if !isnothing(gtpsa_map)
+    if gtpsa_map == true
+      GTPSA.numvars(GTPSA.desc_current) == 6 || error("Invalid GTPSA Descriptor! Number of variables must be equal to 6.")
+      T = promote_type(TPS64, T1)
+    else
+      error("For no GTPSA map tracking, please omit the gtpsa_map kwarg or set gtpsa_map=nothing. This is to ensure type stability.")
+    end
+  else
+    T = T1
+  end
   
-    if !isnothing(spin)
-      if spin == true
-        # Use "one(first(..))" etc for GTPSA - descriptor is implicit
-        q0 = T[one(first(v.x))]  
-        q1 = T[zero(first(v.x))]
-        q2 = T[zero(first(v.x))]
-        q3 = T[zero(first(v.x))]
-        q = StructArray{Quaternion{T}}((q0, q1, q2, q3))
+  @inline function make_vec_T(T, vec_or_num, N_particle)
+    if vec_or_num isa AbstractVector
+      if eltype(vec_or_num) == T
+        return vec_or_num
       else
-        error("For no spin tracking, please omit the spin kwarg or set spin=nothing. This is to ensure type stability.")
+        return T.(vec_or_num)
       end
     else
-      q = nothing
+      if isimmutable(T)
+        return fill(T(vec_or_num),  N_particle)
+      else
+        vec = Vector{T}(undef, N_particle)
+        for i in eachindex(vec)
+          vec[i] = T(vec_or_num)
+        end
+        return vec
+      end
     end
   end
 
+  x1  = make_vec_T(T, x,  N_particle)
+  px1 = make_vec_T(T, px, N_particle)
+  y1  = make_vec_T(T, y,  N_particle)
+  py1 = make_vec_T(T, py, N_particle)
+  z1  = make_vec_T(T, z,  N_particle)
+  pz1 = make_vec_T(T, pz, N_particle)
 
-  return Beam(species, Float64(beta_gamma_ref), v, q)
-end
-
-
-# Initialize Beam as identity GTPSA
-# Creates a Beam as identity GTPSA
-function Beam(d::Descriptor; species::Species=Species("electron"), beta_gamma_ref=1.0, spin::Union{Bool,Nothing}=nothing)
-  GTPSA.numvars(d) == 6 || error("Invalid GTPSA Descriptor! Number of variables must be equal to 6.")
-  v = vars(d)
-  return Beam(species=species, beta_gamma_ref=beta_gamma_ref, spin=spin, x=v[1], px=v[2], y=v[3], py=v[4], z=v[5], pz=v[6])
-end
-
-
-# Initialize a Beam with several particles
-function Beam(n::Integer; species::Species=Species("electron"), 
-              beta_gamma_ref=1.0, spin::Union{Bool,Nothing}=nothing,
-              x::AbstractVector=zeros(n), px::AbstractVector=zeros(n), 
-              y::AbstractVector=zeros(n), py::AbstractVector=zeros(n), 
-              z::AbstractVector=zeros(n), pz::AbstractVector=zeros(n))
-      
-  v = StructArray{Coord}(promote(x, px, y, py, z, pz))
-
-  if !isnothing(spin)
-  if spin == true
-  # Use "one(first(..))" etc for GTPSA - descriptor is implicit
-  q0 = T[one(first(v.x))]  
-  q1 = T[zero(first(v.x))]
-  q2 = T[zero(first(v.x))]
-  q3 = T[zero(first(v.x))]
-  q = StructArray{Quaternion{T}}((q0, q1, q2, q3))
-  else
-  error("For no spin tracking, please omit the spin kwarg or set spin=nothing. This is to ensure type stability.")
-  end
-  else
-  q = nothing
+  coords = (x1, px1, y1, py1, z1, pz1)
+  if !isnothing(gtpsa_map) # Set slopes if GTPSA map tracking
+    for var_idx in eachindex(coords)
+      for i in eachindex(coords[var_idx])
+        coords[var_idx][i][var_idx] = 1.0
+      end
+    end
   end
 
-  return Beam(species, Float64(beta_gamma_ref), v, q)
-end
+  v = StructArray{Coord{T}}((x1, px1, y1, py1, z1, pz1))
 
-# Initialize a Beam given some distributions in each coordinate
-function Beam(n::Integer; species::Species=Species("electron"), 
-              beta_gamma_ref=1.0, spin::Union{Bool,Nothing}=nothing,
-              d_x::Distribution=Normal(0,0), d_px::Distribution=Normal(0,0), 
-              d_y::Distribution=Normal(0,0), d_py::Distribution=Normal(0,0), 
-              d_z::Distribution=Normal(0,0), d_pz::Distribution=Normal(0,0))
-
-  x  = rand(d_x , n)
-  px = rand(d_px, n)
-  y  = rand(d_y , n)
-  py = rand(d_py, n)
-  z  = rand(d_z , n)
-  pz = rand(d_pz, n)
-
-  v = StructArray{Coord{eltype(x)}}((x, px, y, py, z, pz))
-  
   if !isnothing(spin)
     if spin == true
-      q0 = ones(eltype(x), n)
-      q1 = zeros(eltype(x), n)
-      q2 = zeros(eltype(x), n)
-      q3 = zeros(eltype(x), n)
-      q = StructArray{Quaternion{eltype(x)}}((q0, q1, q2, q3))
+      q0 = make_vec_T(T, 1, N_particle)
+      q1 = make_vec_T(T, 0, N_particle)
+      q2 = make_vec_T(T, 0, N_particle)
+      q3 = make_vec_T(T, 0, N_particle)
+      q = StructArray{Quaternion{T}}((q0, q1, q2, q3))
     else
       error("For no spin tracking, please omit the spin kwarg or set spin=nothing. This is to ensure type stability.")
     end
   else
     q = nothing
   end
+
 
   return Beam(species, Float64(beta_gamma_ref), v, q)
 end
