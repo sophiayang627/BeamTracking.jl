@@ -1,6 +1,6 @@
 #=
 
-Beam, Coord, and Particle type definitions. StructArrays is 
+Bunch, Coord, and Particle type definitions. StructArrays is 
 used to handle an internal SoA layout of memory which also 
 allows us to mutate, so both the phase space Coord struct 
 (defined here) and Quaternion struct (defined in 
@@ -21,30 +21,30 @@ Base.@kwdef struct Coord{T} <: FieldVector{6, T}
   pz::T = 0.0
 end
 
-# Static quaternion type defined by ReferenceFrameRotations
+# Static quaternion type defined by ReferenceFrameRotatio
 
-struct Beam{T<:StructVector{<:Coord}, U<:Union{Nothing, StructVector{<:Quaternion}}}
+struct Bunch{T<:StructVector{<:Coord}, U<:Union{Nothing, StructVector{<:Quaternion}}}
   species::Species
   beta_gamma_ref::Float64
   v::T
   q::U
 end
 
-# Initialize a Beam with either a single particle (scalars)
+# Initialize a Bunch with either a single particle (scalars)
 """
-    Beam(; species::Species=Species("electron"), beta_gamma_ref=1.0, 
+    Bunch(; species::Species=Species("electron"), beta_gamma_ref=1.0, 
            spin::Union{Bool,Nothing}=nothing, gtpsa_map::Union{Bool,Nothing}=nothing,
            x::Union{Number,AbstractVector}=0.0, px::Union{Number,AbstractVector}=0.0, 
            y::Union{Number,AbstractVector}=0.0, py::Union{Number,AbstractVector}=0.0, 
            z::Union{Number,AbstractVector}=0.0, pz::Union{Number,AbstractVector}=0.0 )
 
 
-Initializes a `Beam`. Any of the specified phase space coordinates may be scalar `Number`s or 
+Initializes a `Bunch`. Any of the specified phase space coordinates may be scalar `Number`s or 
 `Vector`s to store as a structure-of-arrays. Internally, all phase space coordinates are stored 
-as `Vector`s. If all phase space coordinates are scalar `Number`s, then a `Beam` is created with 
+as `Vector`s. If all phase space coordinates are scalar `Number`s, then a `Bunch` is created with 
 a single particle. If any of the coordinates are specified as `Vector`s, then all other scalar-
-specified quantities are `fill`-ed as `Vector`s. For example, `Beam(x=1.0, y=[2,3])` creates a 
-beam with two particles having the phase space coordinates `[1.0, 0.0, 2.0, 0.0, 0.0, 0.0]` 
+specified quantities are `fill`-ed as `Vector`s. For example, `Bunch(x=1.0, y=[2,3])` creates a 
+bunch with two particles having the phase space coordinates `[1.0, 0.0, 2.0, 0.0, 0.0, 0.0]` 
 and `[1.0, 0.0, 3.0, 0.0, 0.0, 0.0]`.
 
 ## Other keyword arguments
@@ -53,12 +53,12 @@ and `[1.0, 0.0, 3.0, 0.0, 0.0, 0.0]`.
 • `spin`            -- If true, spin tracking is turned on and a quaternion for each particle is tracked
 • `gtpsa_map`       -- If true, GTPSA map tracking is used for each particle using the Descriptor defined in GTPSA.desc_current
 """
-function Beam(; species::Species=Species("electron"), beta_gamma_ref=1.0, 
+function Bunch(; species::Species=Species("electron"), beta_gamma_ref=1.0, 
                 spin::Union{Bool,Nothing}=nothing, gtpsa_map::Union{Bool,Nothing}=nothing,
                 x::Union{Number,AbstractVector}=0.0, px::Union{Number,AbstractVector}=0.0, 
                 y::Union{Number,AbstractVector}=0.0, py::Union{Number,AbstractVector}=0.0, 
                 z::Union{Number,AbstractVector}=0.0, pz::Union{Number,AbstractVector}=0.0 )
-
+                
   idx_vector = findfirst(t->t isa AbstractVector, (x, px, y, py, z, pz))
   if isnothing(idx_vector)
     N_particle = 1
@@ -131,7 +131,7 @@ function Beam(; species::Species=Species("electron"), beta_gamma_ref=1.0,
   end
 
 
-  return Beam(species, Float64(beta_gamma_ref), v, q)
+  return Bunch(species, Float64(beta_gamma_ref), v, q)
 end
 
 struct Particle{T,U<:Union{Nothing,Quaternion{T}}}
@@ -141,8 +141,8 @@ struct Particle{T,U<:Union{Nothing,Quaternion{T}}}
   q::U
 end
 
-function Particle(beam::Beam, idx::Integer=1)
-  v = beam.v[idx] # StructArrays handles this!
-  q = isnothing(beam.q) ? nothing : beam.q[idx]
-  return Particle(beam.species, beam.beta_gamma_ref, v, q)
+function Particle(bunch::Bunch, idx::Integer=1)
+  v = bunch.v[idx] # StructArrays handles this!
+  q = isnothing(bunch.q) ? nothing : bunch.q[idx]
+  return Particle(bunch.species, bunch.beta_gamma_ref, v, q)
 end

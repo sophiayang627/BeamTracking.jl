@@ -5,12 +5,12 @@ The design of `BeamTracking.jl` is built with modularity, high performance, diff
 The entire package is centered around one single `track!` function, which has the following format:
 
 ```julia
-track!(beam::Beam, element, work=work)
+track!(bunch::Bunch, element, work=work)
 ```
 
-Here, `beam` is a `Beam` struct, which is described in detail [below](@ref beam). `element` is some element which to track the beam through, and `work` is an optional tuple of the minimal number of temporaries needed for use inside the tracking function (for some elements, it is an empty tuple). 
+Here, `bunch` is a `Bunch` struct, which is described in detail [below](@ref bunch). `element` is some element which to track the bunch through, and `work` is an optional tuple of the minimal number of temporaries needed for use inside the tracking function (for some elements, it is an empty tuple). 
 
-After calling `track!`, the `beam` struct is mutated to contain the particle phase space coordinates (and possiblly spin transport quaternions) after propagation through the `element`. With this `track!` function, all one needs to do is define their own custom `element` type, and then when looping through a vector of elements, Julia's multiple dispatch will take care of each particular element.
+After calling `track!`, the `bunch` struct is mutated to contain the particle phase space coordinates (and possiblly spin transport quaternions) after propagation through the `element`. With this `track!` function, all one needs to do is define their own custom `element` type, and then when looping through a vector of elements, Julia's multiple dispatch will take care of each particular element.
 
 For example, using the `Linear.Drift` and `Linear.Quadrupole` elements:
 
@@ -21,17 +21,17 @@ qd = Linear.Quadrupole(Bn1=18.5, L=0.5)
 
 fodo = (qf, d, qd, d)
 
-beam = Beam(x=1e-3, px=1e-4, pz=1e-4, beta_gamma_ref=35000.) # Creates a Beam with one particle
+bunch = Bunch(x=1e-3, px=1e-4, pz=1e-4, beta_gamma_ref=35000.) # Creates a Bunch with one particle
 for ele in fodo
-  track!(beam, ele)
+  track!(bunch, ele)
 end
 ```
 
-## [The `Beam` Struct](@id beam)
+## [The `Bunch` Struct](@id bunch)
 
-The `Beam` struct contains the following fields:
+The `Bunch` struct contains the following fields:
 
-- **`species::Species`** -- A `Species` type storing the beam species (e.g. electron)
+- **`species::Species`** -- A `Species` type storing the bunch species (e.g. electron)
 - **`beta_gamma_ref::Float64`**   -- A reference Lorentz $\beta\gamma$ for normalizing the transverse momenta to
 - **`v::T`** -- All particles' 6D phase space coordinates stored in a structure-of-arrays (SoA) memory layout
 - **`q::U`** -- If spin tracking, then all particles' spin transport quaternions (using the quaternion type defined in [`ReferenceFrameRotations.jl`](https://github.com/JuliaSpace/ReferenceFrameRotations.jl)) stored in a structure-of-arrays layout. Else, `nothing`
@@ -70,13 +70,13 @@ v.x  # accesses x array
 v.px # accesses px array
 v[1] # This goes from SoA to a single Coord struct representing the first Coord! 
 ```
-In the above example, `v` is what is stored in the `Beam` struct. The choice of SoA was made after careful speed benchmarks and the desire to have a mutable interface (`track!` instead of `track.` for a beam).
+In the above example, `v` is what is stored in the `Bunch` struct. The choice of SoA was made after careful speed benchmarks and the desire to have a mutable interface (`track!` instead of `track.` for a bunch).
 
 When there spin tracking, `q`  is a `StructArray{<:Quaternion}`
 
 ## Rules for `track!` Implementations
 
-Vectorized operations should be used. The function should be type-stable and, when pre-allocating the necessary `work`, have zero allocations included when tracking a single _non-parametric_ GTPSA map or tracking a beam of particles as immutable numbers (`Float64` or `Dual` numbers for example). For parametric GTPSA maps (e.g. when a quadrupole strength is included as a parameter in the GTPSA), the allocation restriction is loosened in order to maintain readable code. Tests for this are included in the `test_matrix` function in [`runtests.jl`](https://github.com/bmad-sim/BeamTracking.jl/blob/main/test/runtests.jl)
+Vectorized operations should be used. The function should be type-stable and, when pre-allocating the necessary `work`, have zero allocations included when tracking a single _non-parametric_ GTPSA map or tracking a bunch of particles as immutable numbers (`Float64` or `Dual` numbers for example). For parametric GTPSA maps (e.g. when a quadrupole strength is included as a parameter in the GTPSA), the allocation restriction is loosened in order to maintain readable code. Tests for this are included in the `test_matrix` function in [`runtests.jl`](https://github.com/bmad-sim/BeamTracking.jl/blob/main/test/runtests.jl)
 
 ## Compatibility with `GTPSA.jl`
 
