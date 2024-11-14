@@ -10,7 +10,7 @@ Base.@kwdef struct Taylor{T<:TPS,U<:Union{Nothing,Quaternion{<:T}}}
   q::U
 end
 
-function track!(beam::Beam, ele::Misc.Taylor)
+function track!(bunch::Bunch, ele::Misc.Taylor)
 
 end
 

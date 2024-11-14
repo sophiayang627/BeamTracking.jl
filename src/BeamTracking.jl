@@ -9,7 +9,7 @@ using GTPSA,
 
 include("aapc.jl")
 
-export Beam,       
+export Bunch,       
        Coord, 
        Quaternion,
        Particle,
@@ -41,7 +41,7 @@ export Beam,
 include("types.jl")
 
 # Empty tracking method to be imported by submodules 
-track!(beam::Beam, ::Nothing; work=nothing) = beam
+track!(bunch::Bunch, ::Nothing; work=nothing) = bunch
 
 # --------------------------------------------------
 
