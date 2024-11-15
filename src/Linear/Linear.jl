@@ -116,7 +116,7 @@ function track!(beam::Beam, ele::Linear.Quadrupole; work=get_work(beam, Val{1}()
 end 
 
 """
-Routine to linearly tracking through a Sector Magnet
+Routine to linearly tracking through a Sector Bending Magnet
 """
 function track!(beamf::Beam, ele::Linear.SBend, beami::Beam)
   @assert !(beamf === beami) "Aliasing beamf === beami not allowed!"
