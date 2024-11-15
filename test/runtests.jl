@@ -12,22 +12,22 @@ BenchmarkTools.DEFAULT_PARAMETERS.evals = 2
 function test_matrix(ele, n_work, M_expected; type_stable=true, no_allocs=true, tol=1e-14, 
                                               beta_gamma_ref=1.0, species=Species("electron")   )
     
-  d = Descriptor(6, 1) # 6 variables, order 1
-  beam = Beam(d, beta_gamma_ref=beta_gamma_ref, species=species) 
-  work = BeamTracking.get_work(beam, Val(n_work))
+  GTPSA.desc_current = Descriptor(6, 1) # 6 variables, order 1
+  bunch = Bunch(beta_gamma_ref=beta_gamma_ref, species=species, gtpsa_map=true) 
+  work = BeamTracking.get_work(bunch, Val(n_work))
 
-  track!(beam, ele, work=work)
-  p = Particle(beam, 1)
+  track!(bunch, ele, work=work)
+  p = Particle(bunch, 1)
 
   # 1) Correctness
   @test norm(GTPSA.jacobian(p.v) - M_expected) < tol 
   # 2) Type stability
   if type_stable
-    @test_opt track!(beam, ele, work=work)
+    @test_opt track!(bunch, ele, work=work)
   end
   # 3) No Allocations
   if no_allocs
-    @test @ballocated(track!($beam, $ele, work=$work)) == 0 
+    @test @ballocated(track!($bunch, $ele, work=$work)) == 0 
   end
 end
 

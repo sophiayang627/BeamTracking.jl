@@ -51,11 +51,11 @@ Base.@kwdef struct Solenoid{T}
 end
 
 
-function track!(beam::Beam, ele::Linear.Drift; work=get_work(beam, Val{0}()))
+function track!(bunch::Bunch, ele::Linear.Drift; work=get_work(bunch, Val{0}()))
   L = ele.L
-  v = beam.v
+  v = bunch.v
   
-  gamma_ref = sr_gamma(beam.beta_gamma_ref)
+  gamma_ref = sr_gamma(bunch.beta_gamma_ref)
 
   @FastGTPSA! begin
   @. v.x  = v.x + L*v.px
@@ -65,16 +65,16 @@ function track!(beam::Beam, ele::Linear.Drift; work=get_work(beam, Val{0}()))
 
   # Spin unchanged
   
-  return beam
+  return bunch
 end
 
 
-function track!(beam::Beam, ele::Linear.Quadrupole; work=get_work(beam, Val{1}()))
-  v = beam.v
+function track!(bunch::Bunch, ele::Linear.Quadrupole; work=get_work(bunch, Val{1}()))
+  v = bunch.v
   L = ele.L
 
-  Kn1 = ele.Bn1 / brho(massof(beam.species), beam.beta_gamma_ref, chargeof(beam.species))
-  gamma_ref = sr_gamma(beam.beta_gamma_ref)
+  Kn1 = ele.Bn1 / brho(massof(bunch.species), bunch.beta_gamma_ref, chargeof(bunch.species))
+  gamma_ref = sr_gamma(bunch.beta_gamma_ref)
 
   if Kn1 >= 0
     k = sqrt(Kn1)
@@ -112,13 +112,13 @@ function track!(beam::Beam, ele::Linear.Quadrupole; work=get_work(beam, Val{1}()
   @. v.z      = v.z + L/gamma_ref^2*v.pz
   end 
 
-  return beam
+  return bunch
 end 
 
 """
 Routine to linearly tracking through a Sector Bending Magnet
 """
-function track!(beamf::Beam, ele::Linear.SBend, beami::Beam)
+function track!(beamf::Bunch, ele::Linear.SBend, beami::Bunch)
   @assert !(beamf === beami) "Aliasing beamf === beami not allowed!"
   zi = beami.vec
   zf = beamf.vec
@@ -144,7 +144,7 @@ end
 """
 Routine to linearly tracking through a Combined Magnet
 """
-function track!(beamf::Beam, ele::Linear.Combined, beami::Beam)
+function track!(beamf::Bunch, ele::Linear.Combined, beami::Bunch)
   @assert !(beamf === beami) "Aliasing beamf === beami not allowed!"
   zi = beami.vec
   zf = beamf.vec
