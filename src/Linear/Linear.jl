@@ -127,24 +127,47 @@ function track!(bunch::Bunch, ele::Linear.SBend; work=getwork(bunch,Val{1}()))
 
 
   #curvature of B field -- confusion: g =  1/rho = qB0/p? 
-  #g = ele.B0 / brho(massof(bunch.species),bunch.beta_gamma_ref,chargeof(bunch.species))
-  gL = g * L
+  gtot = ele.B0 / brho(massof(bunch.species),bunch.beta_gamma_ref,chargeof(bunch.species))
+
+  pd = g * gtot
+  K = sqrt(pd)
+  kL = K * L
+  diff =  g - gtot
   
-  co = cos(gL)
-  si = sin(gL)
+  co = cos(kL)
+  si = sin(kL)
   tan1 = tan(e1)
   tan2 = tan(e2)
   
   @FastGTPSA! begin
-  @. work[1] = (1 - gL * tan1) * v.y + L * v.py  #new y 
-  @. v.py = - g * (tan2 + tan1 * (1 - gL * tan2)) * v.y + (1 - gL * tan2) * v.py
-  @. v.y = 0 + work[1]
+    @. m21 = K * ((tan1 + tan2) * co + (tan1 * tan2 - 1) * si)
+    @. m26 = (g + diff)* si / K + K/gtot *(1 - co)* tan2
 
-  @. work[1] = (co + si * tan1) * v.x + si / g * v.px + (1 - co) / g * v.pz # new x
-  @. v.px = g * ((tan1 + tan2) * co + (tan1 * tan2 - 1) * si) * v.x + (co + si * tan2) * v.px + (si + (1 - co) * tan2) * pz
-  @. v.z = - (si + (co - 1) * tan1) * v.x + (co - 1) / g * v.px + v.z + (si - gL) / g * v.pz
+    @. m51 = - g/K * si + (diff)*l^2/2 * (1-co*si)/kL - (K*(1-co)/gtot - (diff)*si^2/K/2) * tan1
+    @. m52 = (co - 1) / gtot - (diff) * (si^2 / pd / 2)
+    @. m56 = - g / gtot * L + L/gamma_ref^2 + g^2 / K^3 * si - (diff)^2 * L * (1 - co * si / kL) / gtot / 2
+    @. cons =  - diff / gtot * L + g * (diff) * si / K^3 - (diff)^2 * L * (1 - co * si / kL) /pd / 4
 
-  v.x = 0 + work[1]
+    @. work[1] = (1 - kL * tan1) * v.y + L * v.py #new y
+    @. v.py = - K * (tan2 + tan1 * (1 - kL *tan2)) * v.y + (1 - kL * tan2) * v.py 
+    @. v.y = 0 + work[1]
+
+    @. work[1] = (co + si * tan1) * v.x + si / K * v.px + (1 - co)/gtot * v.pz + (diff)*(1 - co)/pd #new x
+    @. v.px = m21 * v.x + (co + si * tan2) *  v.px + m26 * v.pz + (diff) * si / K
+    @. v.z = m51 * v.x + m52 * v.px + v.z + m56 * v.pz + cons
+
+    @. v.x = 0 + work[1]
+ 
+  # @. work[1] = (1 - gL * tan1) * v.y + L * v.py  #new y 
+  # @. v.py = - g * (tan2 + tan1 * (1 - gL * tan2)) * v.y + (1 - gL * tan2) * v.py
+  # @. v.y = 0 + work[1]
+
+  # @. work[1] = (co + si * tan1) * v.x + si / g * v.px + (1 - co) / g * v.pz # new x
+  # @. v.px = g * ((tan1 + tan2) * co + (tan1 * tan2 - 1) * si) * v.x + (co + si * tan2) * v.px + (si + (1 - co) * tan2) * pz
+  # @. v.z = - (si + (co - 1) * tan1) * v.x + (co - 1) / g * v.px + v.z + (si - gL) / g * v.pz
+
+  # @.v.x = 0 + work[1]
+
   end 
 
   return bunch
@@ -196,8 +219,8 @@ function track!(bunch::Bunch, ele::Linear.Solenoid; work=getwork(bunch,Val{3}())
 
   @FastGTPSA!  begin
   @. work[1] = co^2 * v.x + si2 / S * v.px + si2 / 2 * v.y + si^2 * 2 / S * v.py #new x
-  @. work[2] = - si2 * S / 4 * v.x + co^2 * v.px - si2 * S / 2 * v.y + si2 / 2 * v.py #new px 
-  @. work[3] = - si2 / 2 * v.x - si2 * 2 / S * v.px + co^2 * v.y + si2 / S * v.py
+  @. work[2] = - si2 * S / 4 * v.x + co^2 * v.px - si^2 * S / 2 * v.y + si2 / 2 * v.py #new px 
+  @. work[3] = - si2 / 2 * v.x - si^2 * 2 / S * v.px + co^2 * v.y + si2 / S * v.py
   @. v.py = si^2 * S / 2 * v.x - si2 / 2 * v.px - si2 * S / 4 * v.y + co^2 * v.py 
 
   @. v.x = 0 + work[1]

@@ -85,10 +85,10 @@ end
   Bs = S * brho_ref
   phi = S * L_s / 2
   so = Linear.Solenoid(L = L_s, Bs = Bs)
-  M_solenoid_expected = [cos(phi)*cos(phi)  sin(2*phi)/S  sin(2*phi)/2  sin(phi)*sin(phi)*2/S   0.0  0.0;
-                         -sin(2*phi)*S/4  cos(phi)*cos(phi) -S/2*sin(phi)*sin(phi)  sin(2*phi)/2  0.0 0.0;
-                         -sin(2*phi)/2  -2/S*sin(phi)*sin(phi)  cos(phi)*cos(phi) sin(2*phi)/S  0.0 0.0;
-                         S/2*sin(phi)*sin(phi)  -sin(2*phi)/2 -S/4*sin(2*phi) cos(phi)*cos(phi) 0.0 0.0;
+  M_solenoid_expected = [cos(phi)^2  sin(2*phi)/S  sin(2*phi)/2  sin(phi)^2*2/S   0.0  0.0;
+                         -sin(2*phi)*S/4  cos(phi)^2 -S/2*sin(phi)^2  sin(2*phi)/2  0.0 0.0;
+                         -sin(2*phi)/2  -2/S*sin(phi)^2 cos(phi)^2 sin(2*phi)/S  0.0 0.0;
+                         S/2*sin(phi)^2  -sin(2*phi)/2 -S/4*sin(2*phi) cos(phi)^2 0.0 0.0;
                           0.0 0.0 0.0 0.0 1 L_s/gamma_ref^2;
                           0.0 0.0 0.0 0.0 0.0 1]
   
