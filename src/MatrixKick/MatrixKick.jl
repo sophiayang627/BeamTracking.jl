@@ -16,6 +16,14 @@ end
 
 
 function track!(beam::Beam, ele::MatrixKick.Drift; work=get_work(beam, Val{1}()))
+#=
+This function implements symplectic tracking through a drift,
+derived using the Hamiltonian (25.9) given in the BMad manual.
+As a consequence of using that Hamiltonian, the reference value
+of βγ must be that of a particle with the design energy.
+Should we wish to change that, we shall need to carry both
+reference and design values.
+=#
   L = ele.L
   v = beam.v
 
