@@ -19,14 +19,23 @@ function track!(beam::Beam, ele::MatrixKick.Drift; work=get_work(beam, Val{1}())
   L = ele.L
   v = beam.v
 
-  tilde_m = 1 / beam.beta_gamma_ref
-  beta_ref = sr_beta(beam.beta_gamma_ref)
+  tilde_m    = 1 / beam.beta_gamma_ref
+  gamsqr_ref = 1 + beam.beta_gamma_ref^2
+  beta_ref   = beam.beta_gamma_ref / sqrt(gamsqr_ref)
 
   @FastGTPSA! begin
-  @. work[1] = 1 / sqrt((1.0 + v.pz)^2 - (v.px^2 + v.py^2))
-  @. v.x  .= v.x + v.px * L * work[1]
-  @. v.y  .= v.y + v.py * L * work[1]
-  @. v.z  .= v.z - (1.0 + v.pz) * (L * work[1] - L / (beta_ref * sqrt((1.0 + v.pz)^2 + tilde_m^2)))
+  @. work[1] = sqrt((1.0 + v.pz)^2 - (v.px^2 + v.py^2))  # P_s
+  @. v.x  .= v.x + v.px * L / work[1]
+  @. v.y  .= v.y + v.py * L / work[1]
+  #@. v.z  .= v.z - ( (1.0 + v.pz) * L
+  #                   * (1. / work[1] - 1. / (beta_ref * sqrt((1.0 + v.pz)^2 + tilde_m^2))) )
+  # high-precision computation of z-final
+  @. v.z  .= v.z - ( (1.0 + v.pz) * L
+                     * ((v.px^2 + v.py^2) - v.pz * (2 + v.pz) / gamsqr_ref)
+                     / ( beta_ref * sqrt((1.0 + v.pz)^2 + tilde_m^2) * work[1]
+                         * (beta_ref * sqrt((1.0 + v.pz)^2 + tilde_m^2) + work[1])
+                       )
+                   )
   end
 
   # Spin unchanged
