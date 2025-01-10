@@ -1,5 +1,6 @@
 module MatrixKick
 using ..GTPSA: @FastGTPSA!, GTPSA
+using StructArrays
 import ..BeamTracking: track!
 using ..BeamTracking
 using ..BeamTracking: get_work
@@ -60,13 +61,13 @@ function track!(beam::Beam, ele::MatrixKick.Quadrupole; work=get_work(beam, Val{
 
   # κ^2 (kappa-squared) := (q g / P0) / (1 + δ)
   # numerator of κ^2
-  k2_num = Bn1 / brho(massof(beam.species), beam.beta_gamma_ref, chargeof(beam.species))
+  k2_num = ele.Bn1 / brho(massof(beam.species), beam.beta_gamma_ref, chargeof(beam.species))
 
   v = beam.v
   v_work = StructArray{Coord{eltype(work[1])}}((work[1], work[2], work[3], work[4], work[5], work[6]))
 
   trackQuadMx!(v_work, v, k2_num, L / 2)
-  trackQuadK!( v, v_work, L)
+  trackQuadK!( v, v_work, beam.beta_gamma_ref, L)
   trackQuadMx!(v_work, v, k2_num, L / 2)
 
   v .= v_work
@@ -75,7 +76,7 @@ end # function track!(::Beam, ::Quadrupole)
 
 
 """
-    trackQuadMx!(beamf::Beam, beami::Beam, k2_num::Float64, s::Float64)
+    trackQuadMx!(vf::StructArray, vi::StructArray, k2_num::Float64, s::Float64)
 
 track "matrix part" of quadrupole
 """
@@ -89,14 +90,14 @@ function trackQuadMx!(vf, vi, k2_num, s)
   xp = @. vi.px / p  # x'
   yp = @. vi.py / p  # y'
 
-  cx =  @. focus * cos(ks)    + defocus * cosh(ks)
-  cy =  @. focus * cosh(ks)   + defocus * cos(ks)
-  sx =  @. focus * sincu(ks)  + defocus * sinhc(ks)
-  sy =  @. focus * sinhc(ks)  + defocus * sincu(ks)
-  sx2 = @. focus * sincu(2ks) + defocus * sinhc(2ks)
-  sy2 = @. focus * sinhc(2ks) + defocus * sincu(2ks)
-  sxz = @. focus * sin(ks)^2  - defocus * sinh(ks)^2
-  syz = @. focus * sinh(ks)^2 - defocus * sin(ks)^2
+  cx =  @. focus * cos(ks)     + defocus * cosh(ks)
+  cy =  @. focus * cosh(ks)    + defocus * cos(ks)
+  sx =  @. focus * sincu(ks)   + defocus * sinhcu(ks)
+  sy =  @. focus * sinhcu(ks)  + defocus * sincu(ks)
+  sx2 = @. focus * sincu(2ks)  + defocus * sinhcu(2ks)
+  sy2 = @. focus * sinhcu(2ks) + defocus * sincu(2ks)
+  sxz = @. focus * sin(ks)^2   - defocus * sinh(ks)^2
+  syz = @. focus * sinh(ks)^2  - defocus * sin(ks)^2
 
   @. vf.x  = vi.x  * cx + xp * s * sx
   @. vf.px = vi.px * cx - vi.x * p * k2 * s * sx
@@ -123,21 +124,23 @@ which suffers a loss of precision when ``|A| \\ll 1``. To combat that
 problem, we rewrite it in the form ``A / (1 + \\sqrt{1-A})``---more
 complicated, yes, but far more accurate.
 """
-function trackQuadK!(vf, vi, s)
-  tilde_m = 1 / beami.beta_gamma_ref  # mc^2 / p0·c
-  beta_ref = sr_beta(beami.beta_gamma_ref)
+function trackQuadK!(vf, vi, betgam_ref, s)
+  tilde_m = 1 / betgam_ref  # mc^2 / p0·c
+  beta_ref = sr_beta(betgam_ref)
+  beta_ref = sr_beta(betgam_ref)
+  gamsqr_ref = 1 + betgam_ref^2
 
   p    = @. 1 + vi.pz  # reduced momentum, P/P0 = 1 + δ
-  ptr2 = @. px^r + py^2
+  ptr2 = @. vi.px^2 + vi.py^2
   ps   = @. sqrt(p^2 - ptr2)
 
   @. vf.x  = vi.x + s * vi.px / p * ptr2 / (ps * (p + ps))
   @. vf.y  = vi.y + s * vi.py / p * ptr2 / (ps * (p + ps))
-  @. vf.z  = vi.z - s * ( (1.0 + v.pz)
-                         * ((v.px^2 + v.py^2) - v.pz * (2 + v.pz) / gamsqr_ref)
-                         / ( beta_ref * sqrt((1.0 + v.pz)^2 + tilde_m^2) * work[1]
-                             * (beta_ref * sqrt((1.0 + v.pz)^2 + tilde_m^2) + work[1])
-                           ) - (vi.px^2 + vi.py^2) / (2 * (1 + vi.pz)^2)
+  @. vf.z  = vi.z - s * ( (1.0 + vi.pz)
+                         * (ptr2 - vi.pz * (2 + vi.pz) / gamsqr_ref)
+                         / ( beta_ref * sqrt((1.0 + vi.pz)^2 + tilde_m^2) * ps
+                             * (beta_ref * sqrt((1.0 + vi.pz)^2 + tilde_m^2) + ps)
+                           ) - ptr2 / (2 * (1 + vi.pz)^2)
                         )
   @. vf.px = vi.px
   @. vf.py = vi.py
