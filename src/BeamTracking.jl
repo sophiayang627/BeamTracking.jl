@@ -5,9 +5,8 @@ using GTPSA,
       StructArrays,
       Distributions,
       Unitful
+using AtomicAndPhysicalConstants
 
-
-include("aapc.jl")
 
 export Beam,
        Coord,
