@@ -16,7 +16,7 @@ Base.@kwdef struct Quadrupole{T}
 end
 
 
-function track!(bunch::Bunch, ele::MatrixKick.Drift; work=get_work(beam, Val{1}()))
+function track!(bunch::Bunch, ele::MatrixKick.Drift; work=get_work(bunch, Val{1}()))
 #=
 This function implements symplectic tracking through a drift,
 derived using the Hamiltonian (25.9) given in the BMad manual.
@@ -30,7 +30,7 @@ reference and design values.
 
   tilde_m    = 1 / bunch.beta_gamma_ref
   gamsqr_ref = 1 + bunch.beta_gamma_ref^2
-  beta_ref   = beam.beta_gamma_ref / sqrt(gamsqr_ref)
+  beta_ref   = bunch.beta_gamma_ref / sqrt(gamsqr_ref)
 
   @FastGTPSA! begin
   @. work[1] = sqrt((1.0 + v.pz)^2 - (v.px^2 + v.py^2))  # P_s
@@ -56,7 +56,7 @@ end # function track!(::Bunch, ::Drift)
 
 # This integrator uses the so-called Matrix-Kick-Matrix method to implement
 # an integrator accurate though second-order in the integration step-size.
-function track!(bunch::Bunch, ele::MatrixKick.Quadrupole; work=get_work(beam, Val{6}()))
+function track!(bunch::Bunch, ele::MatrixKick.Quadrupole; work=get_work(bunch, Val{6}()))
   L = ele.L
 
   # κ^2 (kappa-squared) := (q g / P0) / (1 + δ)
@@ -67,11 +67,11 @@ function track!(bunch::Bunch, ele::MatrixKick.Quadrupole; work=get_work(beam, Va
   v_work = StructArray{Coord{eltype(work[1])}}((work[1], work[2], work[3], work[4], work[5], work[6]))
 
   trackQuadMx!(v_work, v, k2_num, L / 2)
-  trackQuadK!( v, v_work, beam.beta_gamma_ref, L)
+  trackQuadK!( v, v_work, bunch.beta_gamma_ref, L)
   trackQuadMx!(v_work, v, k2_num, L / 2)
 
   v .= v_work
-  return beam
+  return bunch
 end # function track!(::Bunch, ::Quadrupole)
 
 

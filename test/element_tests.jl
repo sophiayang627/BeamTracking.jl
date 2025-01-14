@@ -160,7 +160,7 @@ pzf_qd4 = [ 0.,  1.e-3,                  -1.e-3,                  1.e-3,        
   # === drifts ===
   #
   # 5 keV electron
-  beam1 = Beam(species = e_minus, beta_gamma_ref = bg1,
+  beam1 = Bunch(species = e_minus, beta_gamma_ref = bg1,
                x = copy(xi), px = copy(pxi), y = copy(yi), py = copy(pyi), z = copy(zi), pz = copy(pzi))
   track!(beam1, dr1);
   @test beam1.v.x  ≈  xf_dr1 (rtol=5.e-13)
@@ -171,7 +171,7 @@ pzf_qd4 = [ 0.,  1.e-3,                  -1.e-3,                  1.e-3,        
   @test beam1.v.pz == pzf_dr1
   #
   # 1 MeV electron
-  beam2 = Beam(species = e_minus, beta_gamma_ref = bg2,
+  beam2 = Bunch(species = e_minus, beta_gamma_ref = bg2,
                x = copy(xi), px = copy(pxi), y = copy(yi), py = copy(pyi), z = copy(zi), pz = copy(pzi))
   track!(beam2, dr2);
   @test beam2.v.x  ≈  xf_dr2 (rtol=5.e-13)
@@ -182,7 +182,7 @@ pzf_qd4 = [ 0.,  1.e-3,                  -1.e-3,                  1.e-3,        
   @test beam2.v.pz == pzf_dr2
   #
   # 1 GeV electron
-  beam3 = Beam(species = e_minus, beta_gamma_ref = bg3,
+  beam3 = Bunch(species = e_minus, beta_gamma_ref = bg3,
                x = copy(xi), px = copy(pxi), y = copy(yi), py = copy(pyi), z = copy(zi), pz = copy(pzi))
   track!(beam3, dr3);
   @test beam3.v.x  ≈  xf_dr3 (rtol=5.e-13)
@@ -193,7 +193,7 @@ pzf_qd4 = [ 0.,  1.e-3,                  -1.e-3,                  1.e-3,        
   @test beam3.v.pz == pzf_dr3
   #
   # 250 GeV proton
-  beam4 = Beam(species = p_plus, beta_gamma_ref = bg4,
+  beam4 = Bunch(species = p_plus, beta_gamma_ref = bg4,
                x = copy(xi), px = copy(pxi), y = copy(yi), py = copy(pyi), z = copy(zi), pz = copy(pzi))
   track!(beam4, dr3);
   @test beam4.v.x  ≈  xf_dr4 (rtol=5.e-13)
@@ -206,7 +206,7 @@ pzf_qd4 = [ 0.,  1.e-3,                  -1.e-3,                  1.e-3,        
   # === quadrupoles ===
   #
   # 5 keV electron
-  beam1 = Beam(species = e_minus, beta_gamma_ref = bg1,
+  beam1 = Bunch(species = e_minus, beta_gamma_ref = bg1,
                x = copy(xi), px = copy(pxi), y = copy(yi), py = copy(pyi), z = copy(zi), pz = copy(pzi))
   track!(beam1, qf1);
   @test beam1.v.x  ≈  xf_qf1  (rtol=5.e-13)
@@ -215,7 +215,7 @@ pzf_qd4 = [ 0.,  1.e-3,                  -1.e-3,                  1.e-3,        
   @test beam1.v.py ≈  pyf_qf1 (rtol=5.e-13)
   @test beam1.v.z  ≈  zf_qf1  (rtol=5.e-13)
   @test beam1.v.pz == pzf_qf1
-  beam1 = Beam(species = e_minus, beta_gamma_ref = bg1,
+  beam1 = Bunch(species = e_minus, beta_gamma_ref = bg1,
                x = copy(xi), px = copy(pxi), y = copy(yi), py = copy(pyi), z = copy(zi), pz = copy(pzi))
   track!(beam1, qd1);
   @test beam1.v.x  ≈  xf_qd1  (rtol=5.e-13)
@@ -226,7 +226,7 @@ pzf_qd4 = [ 0.,  1.e-3,                  -1.e-3,                  1.e-3,        
   @test beam1.v.pz == pzf_qd1
   #
   # 1 MeV electron
-  beam2 = Beam(species = e_minus, beta_gamma_ref = bg2,
+  beam2 = Bunch(species = e_minus, beta_gamma_ref = bg2,
                x = copy(xi), px = copy(pxi), y = copy(yi), py = copy(pyi), z = copy(zi), pz = copy(pzi))
   track!(beam2, qf2);
   @test beam2.v.x  ≈  xf_qf2  (rtol=5.e-13)
@@ -235,7 +235,7 @@ pzf_qd4 = [ 0.,  1.e-3,                  -1.e-3,                  1.e-3,        
   @test beam2.v.py ≈  pyf_qf2 (rtol=5.e-13)
   @test beam2.v.z  ≈  zf_qf2  (rtol=5.e-13)
   @test beam2.v.pz == pzf_qf2
-  beam2 = Beam(species = e_minus, beta_gamma_ref = bg2,
+  beam2 = Bunch(species = e_minus, beta_gamma_ref = bg2,
                x = copy(xi), px = copy(pxi), y = copy(yi), py = copy(pyi), z = copy(zi), pz = copy(pzi))
   track!(beam2, qd2);
   @test beam2.v.x  ≈  xf_qd2  (rtol=5.e-13)
@@ -246,7 +246,7 @@ pzf_qd4 = [ 0.,  1.e-3,                  -1.e-3,                  1.e-3,        
   @test beam2.v.pz == pzf_qd2
   #
   # 1 GeV electron
-  beam3 = Beam(species = e_minus, beta_gamma_ref = bg3,
+  beam3 = Bunch(species = e_minus, beta_gamma_ref = bg3,
                x = copy(xi), px = copy(pxi), y = copy(yi), py = copy(pyi), z = copy(zi), pz = copy(pzi))
   track!(beam3, qf3);
   @test beam3.v.x  ≈  xf_qf3  (rtol=5.e-13)
@@ -255,7 +255,7 @@ pzf_qd4 = [ 0.,  1.e-3,                  -1.e-3,                  1.e-3,        
   @test beam3.v.py ≈  pyf_qf3 (rtol=5.e-13)
   @test beam3.v.z  ≈  zf_qf3  (rtol=5.e-13)
   @test beam3.v.pz == pzf_qf3
-  beam3 = Beam(species = e_minus, beta_gamma_ref = bg3,
+  beam3 = Bunch(species = e_minus, beta_gamma_ref = bg3,
                x = copy(xi), px = copy(pxi), y = copy(yi), py = copy(pyi), z = copy(zi), pz = copy(pzi))
   track!(beam3, qd3);
   @test beam3.v.x  ≈  xf_qd3  (rtol=5.e-13)
@@ -266,7 +266,7 @@ pzf_qd4 = [ 0.,  1.e-3,                  -1.e-3,                  1.e-3,        
   @test beam3.v.pz == pzf_qd3
   #
   # 250 GeV proton
-  beam4 = Beam(species = p_plus, beta_gamma_ref = bg4,
+  beam4 = Bunch(species = p_plus, beta_gamma_ref = bg4,
                x = copy(xi), px = copy(pxi), y = copy(yi), py = copy(pyi), z = copy(zi), pz = copy(pzi))
   track!(beam4, qf4);
   @test beam4.v.x  ≈  xf_qf4  (rtol=5.e-13)
@@ -275,7 +275,7 @@ pzf_qd4 = [ 0.,  1.e-3,                  -1.e-3,                  1.e-3,        
   @test beam4.v.py ≈  pyf_qf4 (rtol=5.e-13)
   @test beam4.v.z  ≈  zf_qf4  (rtol=5.e-13)
   @test beam4.v.pz == pzf_qf4
-  beam4 = Beam(species = p_plus, beta_gamma_ref = bg4,
+  beam4 = Bunch(species = p_plus, beta_gamma_ref = bg4,
                x = copy(xi), px = copy(pxi), y = copy(yi), py = copy(pyi), z = copy(zi), pz = copy(pzi))
   track!(beam4, qd4);
   @test beam4.v.x  ≈  xf_qd4  (rtol=5.e-13)
