@@ -33,8 +33,8 @@ qd4 = MatrixKick.Quadrupole(L = lq4, Bn1 = -gr4)
 # -- species
 e_minus = Species("electron")
 p_plus =  Species("proton")
-mec2 = 0.51099895069e6; #massof(e_minus)
-mpc2 = 938.27208943e6; #massof(p_plus)
+mec2 = massof(e_minus) # 0.51099895069 MeV
+mpc2 = massof(p_plus)  # 938.27208943 MeV
 # -- kinetic energy
 ek1 =   5.e3;  # eV
 ek2 =   1.e6;  # eV
@@ -66,6 +66,30 @@ yf_dr1  = [ 0.,  0.,                     0.,                     1.e-3,         
 pyf_dr1 = [ 0.,  0.,                     0.,                     0.,                     3.e-4,                 -3.e-4                 ]
 zf_dr1  = [ 0.,  1.4710284465059844e-4, -1.4711135596840458e-4,  1.4710284465059844e-4,  1.4705400485512816e-4,  1.4705400485512816e-4 ]
 pzf_dr1 = [ 0.,  1.e-3,                 -1.e-3,                  1.e-3,                  1.e-3,                  1.e-3                 ]
+
+# beam2.dr2.final
+xf_dr2  = [ 0., 0., 0., 0.002, 0.0025619382449043287, -0.0025619382449043287 ]
+pxf_dr2 = [ 0., 0., 0., 0.,    0.00075,               -0.00075 ]
+yf_dr2  = [ 0., 0., 0., 0.001, 0.0012247752979617315, -0.0012247752979617315 ]
+pyf_dr2 = [ 0., 0., 0., 0.,    0.0003,                -0.0003 ]
+zf_dr2  = [ 0., 0.00008566359457101641, -0.00008589149602558208, 0.00008566359457101641, 0.00008541939559366522, 0.00008541939559366522 ]
+pzf_dr2 = [ 0., 0.001, -0.001, 0.001, 0.001, 0.001 ]
+
+# beam3.dr3.final
+xf_dr3  = [ 0., 0., 0., 0.002, 0.003498501986411544,  -0.003498501986411544 ]
+pxf_dr3 = [ 0., 0., 0., 0.,    0.00075,               -0.00075 ]
+yf_dr3  = [ 0., 0., 0., 0.001, 0.0015994007945646172, -0.0015994007945646172 ]
+pyf_dr3 = [ 0., 0., 0., 0.,    0.0003,                -0.0003 ]
+zf_dr3  = [ 0., 5.209250185095532e-10, -5.224901403178192e-10, 5.209250185095532e-10, -6.506763479180273e-7, -6.506763479180273e-7 ]
+pzf_dr3 = [ 0., 0.001, -0.001, 0.001, 0.001, 0.001 ]
+
+# beam4.dr4.final
+xf_dr4  = [ 0., 0., 0., 0.002, 0.003498501986411544,  -0.003498501986411544 ]
+pxf_dr4 = [ 0., 0., 0., 0.,    0.00075,               -0.00075 ]
+yf_dr4  = [ 0., 0., 0., 0.001, 0.0015994007945646172, -0.0015994007945646172 ]
+pyf_dr4 = [ 0., 0., 0., 0.,    0.0003,                -0.0003 ]
+zf_dr4  = [ 0., 2.7919184691863886e-8, -2.800306686850912e-8, 2.7919184691863886e-8, -6.232780882446728e-7, -6.232780882446728e-7 ]
+pzf_dr4 = [ 0., 0.001, -0.001, 0.001, 0.001, 0.001 ]
 
 # beam1.qf1.final
 xf_qf1  = [ 0.,  0.,                     0.,                     4.4834792779340600e-3,  4.5356143287504990e-3, -4.5356143287504990e-3 ]
@@ -134,6 +158,8 @@ pzf_qd4 = [ 0.,  1.e-3,                  -1.e-3,                  1.e-3,        
 # test individual elements
 @testset "element_tests" begin
   # === drifts ===
+  #
+  # 5 keV electron
   beam1 = Beam(species = e_minus, beta_gamma_ref = bg1,
                x = copy(xi), px = copy(pxi), y = copy(yi), py = copy(pyi), z = copy(zi), pz = copy(pzi))
   track!(beam1, dr1);
@@ -143,6 +169,39 @@ pzf_qd4 = [ 0.,  1.e-3,                  -1.e-3,                  1.e-3,        
   @test beam1.v.px == pxf_dr1
   @test beam1.v.py == pyf_dr1
   @test beam1.v.pz == pzf_dr1
+  #
+  # 1 MeV electron
+  beam2 = Beam(species = e_minus, beta_gamma_ref = bg2,
+               x = copy(xi), px = copy(pxi), y = copy(yi), py = copy(pyi), z = copy(zi), pz = copy(pzi))
+  track!(beam2, dr2);
+  @test beam2.v.x  ≈  xf_dr2 (rtol=5.e-13)
+  @test beam2.v.y  ≈  yf_dr2 (rtol=5.e-13)
+  @test beam2.v.z  ≈  zf_dr2 (rtol=5.e-13)
+  @test beam2.v.px == pxf_dr2
+  @test beam2.v.py == pyf_dr2
+  @test beam2.v.pz == pzf_dr2
+  #
+  # 1 GeV electron
+  beam3 = Beam(species = e_minus, beta_gamma_ref = bg3,
+               x = copy(xi), px = copy(pxi), y = copy(yi), py = copy(pyi), z = copy(zi), pz = copy(pzi))
+  track!(beam3, dr3);
+  @test beam3.v.x  ≈  xf_dr3 (rtol=5.e-13)
+  @test beam3.v.y  ≈  yf_dr3 (rtol=5.e-13)
+  @test beam3.v.z  ≈  zf_dr3 (rtol=5.e-13)
+  @test beam3.v.px == pxf_dr3
+  @test beam3.v.py == pyf_dr3
+  @test beam3.v.pz == pzf_dr3
+  #
+  # 250 GeV proton
+  beam4 = Beam(species = p_plus, beta_gamma_ref = bg4,
+               x = copy(xi), px = copy(pxi), y = copy(yi), py = copy(pyi), z = copy(zi), pz = copy(pzi))
+  track!(beam4, dr3);
+  @test beam4.v.x  ≈  xf_dr4 (rtol=5.e-13)
+  @test beam4.v.y  ≈  yf_dr4 (rtol=5.e-13)
+  @test beam4.v.z  ≈  zf_dr4 (rtol=5.e-13)
+  @test beam4.v.px == pxf_dr4
+  @test beam4.v.py == pyf_dr4
+  @test beam4.v.pz == pzf_dr4
 
   # === quadrupoles ===
   #
@@ -211,19 +270,19 @@ pzf_qd4 = [ 0.,  1.e-3,                  -1.e-3,                  1.e-3,        
                x = copy(xi), px = copy(pxi), y = copy(yi), py = copy(pyi), z = copy(zi), pz = copy(pzi))
   track!(beam4, qf4);
   @test beam4.v.x  ≈  xf_qf4  (rtol=5.e-13)
-  #@test beam4.v.px ≈  pxf_qf4 (rtol=5.e-13)
-  #@test beam4.v.y  ≈  yf_qf4  (rtol=5.e-13)
-  #@test beam4.v.py ≈  pyf_qf4 (rtol=5.e-13)
-  #@test beam4.v.z  ≈  zf_qf4  (rtol=5.e-13)
+  @test beam4.v.px ≈  pxf_qf4 (rtol=5.e-13)
+  @test beam4.v.y  ≈  yf_qf4  (rtol=5.e-13)
+  @test beam4.v.py ≈  pyf_qf4 (rtol=5.e-13)
+  @test beam4.v.z  ≈  zf_qf4  (rtol=5.e-13)
   @test beam4.v.pz == pzf_qf4
   beam4 = Beam(species = p_plus, beta_gamma_ref = bg4,
                x = copy(xi), px = copy(pxi), y = copy(yi), py = copy(pyi), z = copy(zi), pz = copy(pzi))
   track!(beam4, qd4);
-  #@test beam4.v.x  ≈  xf_qd4  (rtol=5.e-13)
-  #@test beam4.v.px ≈  pxf_qd4 (rtol=5.e-13)
-  #@test beam4.v.y  ≈  yf_qd4  (rtol=5.e-13)
-  #@test beam4.v.py ≈  pyf_qd4 (rtol=5.e-13)
-  #@test beam4.v.z  ≈  zf_qd4  (rtol=5.e-13)
+  @test beam4.v.x  ≈  xf_qd4  (rtol=5.e-13)
+  @test beam4.v.px ≈  pxf_qd4 (rtol=5.e-13)
+  @test beam4.v.y  ≈  yf_qd4  (rtol=5.e-13)
+  @test beam4.v.py ≈  pyf_qd4 (rtol=5.e-13)
+  @test beam4.v.z  ≈  zf_qd4  (rtol=5.e-13)
   @test beam4.v.pz == pzf_qd4
 
 
