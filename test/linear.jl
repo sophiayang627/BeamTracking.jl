@@ -17,15 +17,15 @@ using GTPSA
   #Sbend
   #sb_ele1 = Linear.SBend(L = 1.5, B0 = 0.000446) # positive field
 
-  #single particle beam
+  #single particle bunch
   d = Descriptor(6,1)
-  bi = Beam(d)
-  bf_d = Beam(d)
-  bf_q1 = Beam(d)
-  bf_q2 = Beam(d)
-  bf_q3 = Beam(d)
-  bf_q4 = Beam(d)
-  bf_s1 = Beam(d)
+  bi = Bunch(d)
+  bf_d = Bunch(d)
+  bf_q1 = Bunch(d)
+  bf_q2 = Bunch(d)
+  bf_q3 = Bunch(d)
+  bf_q4 = Bunch(d)
+  bf_s1 = Bunch(d)
 
   #Drift 
   track!(bf_d, drift_ele, bi)

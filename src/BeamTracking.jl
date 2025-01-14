@@ -9,8 +9,8 @@ using AtomicAndPhysicalConstants
 @APCdef
 
 
-export Beam,
-       Coord,
+export Bunch,       
+       Coord, 
        Quaternion,
        Particle,
 
@@ -37,8 +37,8 @@ export Beam,
 
 include("types.jl")
 
-# Empty tracking method to be imported by submodules
-track!(beam::Beam, ::Nothing; work=nothing) = beam
+# Empty tracking method to be imported by submodules 
+track!(bunch::Bunch, ::Nothing; work=nothing) = bunch
 
 # --------------------------------------------------
 
