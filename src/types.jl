@@ -70,7 +70,7 @@ function Bunch(; species::Species=Species("electron"), beta_gamma_ref=1.0,
   if !isnothing(gtpsa_map)
     if gtpsa_map == true
       GTPSA.numvars(GTPSA.desc_current) == 6 || error("Invalid GTPSA Descriptor! Number of variables must be equal to 6.")
-      T = promote_type(TPS64{GTPSA.Dynamic}, T1)
+      T = promote_type(TPS64, T1)
     else
       error("For no GTPSA map tracking, please omit the gtpsa_map kwarg or set gtpsa_map=nothing. This is to ensure type stability.")
     end
