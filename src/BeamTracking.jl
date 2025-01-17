@@ -3,9 +3,7 @@ using GTPSA,
       ReferenceFrameRotations,
       StaticArrays,
       StructArrays,
-      Distributions,
-      Unitful
-using AtomicAndPhysicalConstants
+      AtomicAndPhysicalConstants
 @APCdef
 
 
@@ -34,6 +32,7 @@ export Bunch,
 
        track!
 
+import GTPSA: sincu, sinhcu
 
 include("types.jl")
 

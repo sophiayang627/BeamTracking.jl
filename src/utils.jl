@@ -166,11 +166,3 @@ function sinhcu(z::Number)
   end
 end
 
-# These will go in GTPSA
-sincu(z::TPS) = sinc(z/pi)
-sinhcu(z::TPS) = sinhc(z/pi)
-sincu(z::GTPSA.TempTPS) = (GTPSA.div!(z,z,pi); return GTPSA.__t_sinc(z);)
-sinhcu(z::GTPSA.TempTPS) = (GTPSA.div!(z,z,pi); return GTPSA.__t_sinhc(z);)
-
-
-
