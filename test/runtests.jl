@@ -1,6 +1,5 @@
 using Test,
       BeamTracking,
-      Distributions,
       JET,
       BenchmarkTools,
       GTPSA
@@ -270,3 +269,5 @@ end
 
     end
 #include("linear.jl")
+include("element_tests.jl")
+
