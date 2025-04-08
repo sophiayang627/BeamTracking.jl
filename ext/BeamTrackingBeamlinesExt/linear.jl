@@ -1,4 +1,9 @@
-function track!(bunch::Bunch, ele::LineElement, bunch0::Bunch, ::Linear; work=nothing)
+function track!(
+  bunch::Bunch, 
+  ele::LineElement, 
+  ::Linear; 
+  work=nothing
+)
   # Unpack the line element
   ma = ele.AlignmentParams
   bm = ele.BMultipoleParams
@@ -10,34 +15,32 @@ function track!(bunch::Bunch, ele::LineElement, bunch0::Bunch, ::Linear; work=no
   # For some reason, inlining this is faster/zero allocs
   # copy-paste is slower and so is @noinline so I guess LLVM is 
   # doing some kind of constant propagation while inlining this?
-  return @inline _track_linear!(bunch, bunch0, ma, bm, bp, L, Brho_ref; work=work)
+  return @inline _track_linear!(bunch, ma, bm, bp, L, Brho_ref; work=work)
 end
-
 
 function _track_linear!(
   bunch::Bunch, 
-  bunch0::Bunch,
   ma::Union{AlignmentParams,Nothing},
   bm::Union{BMultipoleParams,Nothing}, 
   bp::Union{BendParams,Nothing},
   L, 
   Brho_ref;
-  work=nothing,
+  work=nothing # =zeros(eltype(bunch.v), get_N_particle(bunch), MAX_TEMPS(Linear())),
 ) 
+  v = soaview(bunch)
+  gamma_0 = calc_gamma(bunch.species, bunch.Brho_0)
 
   if !isnothing(bp)
     error("Bend tracking not implemented yet")
   end
-  v = soaview(bunch)
-  v0 = soaview(bunch0)
-  gamma_0 = calc_gamma(bunch0.species, bunch0.Brho_0)
 
   if !isnothing(ma)
-    launch!(ExactTracking.misalign!, v, v0, nothing, ma.x_offset, ma.y_offset, -1)
+    #chain = merge(chain, (ExactTracking.misalign!, ma.x_offset, ma.y_offset, -1))
   end
 
   if isnothing(bm) || length(bm.bdict) == 0 # Drift
-    launch!(LinearTracking.linear_drift!, v, v0, nothing, L, gamma_0)
+    launch!(LinearTracking.linear_drift!, v, nothing, L, L/gamma_0^2)
+    #chain = merge(chain, (LinearTracking.linear_drift!, L, gamma_0))
   else
     if length(bm.bdict) > 1 || !haskey(bm.bdict, 2)
       error("Currently only quadrupole tracking is supported")
@@ -68,12 +71,15 @@ function _track_linear!(
 
     mx, my = LinearTracking.linear_quad_matrices(K1, L)
     r56 = L/gamma_0^2 
-    launch!(LinearTracking.linear_coast_uncoupled!, v, v0, nothing, mx, my, r56)
+    wq = isnothing(work) ? zeros(eltype(bunch.v), get_N_particle(bunch), 1) : work
+    launch!(LinearTracking.linear_coast_uncoupled!, v, wq, mx, my, r56)
+    #chain = merge(chain, (LinearTracking.linear_coast_uncoupled!, mx, my, r56))
   end
 
   if !isnothing(ma)
-    launch!(ExactTracking.misalign!, v, v0, nothing, ma.x_offset, ma.y_offset, 1)
+    #chain = merge(chain, (ExactTracking.misalign!, ma.x_offset, ma.y_offset, -1))
   end
 
+  #launch!(chain, v, work)
   return bunch
 end

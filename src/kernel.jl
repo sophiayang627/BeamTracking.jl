@@ -19,8 +19,7 @@ ALWAYS be the following:
 
 ## Arguments
 - `i`       -- Particle index
-- `v`       -- Output matrix as an SoA or SoA view ALWAYS! (use transpose if AoS)
-- `v0`       -- Input matrix as an SoA or SoA view ALWAYS! (use transpose if AoS)
+- `v`       -- Input/output matrix as an SoA or SoA view ALWAYS! (use transpose if AoS)
 - `work`    -- A Vector of temporary vectors (columns of v) to run the kernel `f!`
 - `args...` -- Any further arguments to run the kernel
 
@@ -31,13 +30,11 @@ ALWAYS be the following:
 @inline function launch!(
   f!::F, 
   v::A,
-  v0::A,
   work, 
   args...; 
-  simd_lane_width = floor(Int, REGISTER_SIZE/sizeof(eltype(A))),
+  simd_lane_width=0, #floor(Int, REGISTER_SIZE/sizeof(eltype(A))),
   multithread_threshold=Threads.nthreads() > 1 ? 1750*Threads.nthreads() : typemax(Int),
 ) where {F,A}
-  @assert size(v) == size(v0) "v and v0 must be the same size"
   N_particle = size(v, 1)
   if A <: SIMD.FastContiguousArray && eltype(A) <: SIMD.ScalarTypes && simd_lane_width != 0 # do SIMD
     lane = VecRange{simd_lane_width}(0)
@@ -46,29 +43,29 @@ ALWAYS be the following:
     if N_particle >= multithread_threshold
       Threads.@threads for i in 1:simd_lane_width:N_SIMD
         @assert last(i) <= N_particle "Out of bounds!"  # Use last because VecRange SIMD
-        f!(lane+i, v, v0, work, args...)
+        f!(lane+i, v, work, args...)
       end
     else
       for i in 1:simd_lane_width:N_SIMD
         @assert last(i) <= N_particle "Out of bounds!"  # Use last because VecRange SIMD
-        f!(lane+i, v, v0, work, args...)
+        f!(lane+i, v, work, args...)
       end
     end
     # Do the remainder
     for i in N_SIMD+1:N_particle
       @assert last(i) <= N_particle "Out of bounds!"
-      f!(i, v, v0, work, args...)
+      f!(i, v, work, args...)
     end
   else
     if N_particle >= multithread_threshold
       Threads.@threads for i in 1:N_particle
         @assert last(i) <= N_particle "Out of bounds!"
-        f!(i, v, v0, work, args...)
+        f!(i, v, work, args...)
       end
     else
       for i in 1:N_particle
-        @assert last(i) <= N_particle "Out of bounds!"
-        f!(i, v, v0, work, args...)
+        #@assert last(i) <= N_particle "Out of bounds!"
+        f!(i, v, work, args...)
       end
     end
   end

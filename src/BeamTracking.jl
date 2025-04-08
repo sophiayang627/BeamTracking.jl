@@ -4,8 +4,9 @@ using GTPSA,
       StaticArrays, 
       SIMD,
       VectorizationBase,
-      Polyester
-
+      Polyester,
+      LoopVectorization
+      
 import GTPSA: sincu, sinhcu
 import Base: setproperty!
 
