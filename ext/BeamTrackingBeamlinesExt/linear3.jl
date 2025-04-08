@@ -20,11 +20,8 @@ function track!(bunch::Bunch, bl::Beamline; work=nothing, static=true)
       track!(bunch, ele; work=work)
     end
   else # get the entire lattice as one track_chain
-    chain = ()
-    for ele in bl.line
-      chain = (chain..., make_track_chain(bunch, ele, ele.tracking_method)...)
-    end
-    launch!(chain[2:end], bunch.v, work)
+    chain = make_track_chain(bunch, bl)
+    launch!(chain, bunch.v, work)
   end
 
   return bunch
@@ -33,14 +30,14 @@ end
 
 
 function make_track_chain(bunch, bl::Beamline)
-  chain = ()
+  chain = KernelCall[]
   for ele in bl.line
-    chain = (chain..., make_track_chain(bunch, ele, ele.tracking_method)...)
+    append!(chain, make_track_chain(bunch, ele, ele.tracking_method))
   end
   return chain
 end
 
-
+#=
 function track!(bunch::Bunch, ele::LineElement; work=zeros(eltype(bunch.v), get_N_particle(bunch), MAX_TEMPS(ele.tracking_method)))
   # Build a track chain for this tracking method:
   track_chain = make_track_chain(bunch, ele, ele.tracking_method)[1]
@@ -49,6 +46,7 @@ function track!(bunch::Bunch, ele::LineElement; work=zeros(eltype(bunch.v), get_
   launch!(track_chain[1], bunch.v, work, track_chain[2:end]...)
   return bunch
 end
+=#
 #=function track!(
   bunch::Bunch, 
   ele::LineElement, 
@@ -101,7 +99,7 @@ end
   Brho_ref
 ) 
 
-  chain = ()
+  chain = KernelCall[]
   gamma_0 = calc_gamma(bunch.species, bunch.Brho_0)
 
   if !isnothing(bp)
@@ -109,12 +107,12 @@ end
   end
 
   if !isnothing(ma)
-    chain = (chain, (ExactTracking.misalign!, ma.x_offset, ma.y_offset, -1))
+    push!(chain, KernelCall(ExactTracking.misalign!, (ma.x_offset, ma.y_offset, -1)))
   end
 
   if isnothing(bm) || length(bm.bdict) == 0 # Drift
     #launch!(LinearTracking.linear_drift!, v, nothing, L, L/gamma_0^2)
-    chain = (chain, (LinearTracking.linear_drift!, L, L/gamma_0^2))
+    push!(chain, KernelCall(LinearTracking.linear_drift!, (L, L/gamma_0^2)))
   else
     if length(bm.bdict) > 1 || !haskey(bm.bdict, 2)
       error("Currently only quadrupole tracking is supported")
@@ -146,14 +144,14 @@ end
     mx, my = LinearTracking.linear_quad_matrices(K1, L)
     r56 = L/gamma_0^2 
     #launch!(LinearTracking.linear_coast_uncoupled!, v, wq, mx, my, r56)
-    chain = (chain, (LinearTracking.linear_coast_uncoupled!, mx, my, r56))
+    push!(chain, KernelCall(LinearTracking.linear_coast_uncoupled!, (mx, my, r56)))
   end
 
   if !isnothing(ma)
-    chain = (chain, (ExactTracking.misalign!, ma.x_offset, ma.y_offset, -1))
+    push!(chain, KernelCall(ExactTracking.misalign!, (ma.x_offset, ma.y_offset, -1)))
   end
   
-  return chain[2:end]
+  return chain
 end
 
 #=

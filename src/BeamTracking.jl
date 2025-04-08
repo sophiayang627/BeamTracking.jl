@@ -13,7 +13,7 @@ import Base: setproperty!
 export Bunch, Species, ParticleView, ELECTRON, POSITRON, PROTON, ANTIPROTON, sincu, sinhcu
 export LinearTracking, Linear
 export ExactTracking, Exact
-export track!
+export track!, make_track_chain, KernelCall
 
 include("utils.jl")
 include("kernel.jl")
@@ -24,6 +24,8 @@ include("modules/LinearTracking.jl") #; TRACKING_METHOD(::LinearTracking) = Line
 
 # Empty tracking method to be imported+implemented by package extensions
 function track! end
+
+function make_track_chain end
 
 function MAX_TEMPS end
 # --------------------------------------------------
