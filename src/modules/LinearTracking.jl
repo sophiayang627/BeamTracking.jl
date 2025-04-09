@@ -6,7 +6,12 @@ Linear tracking methods expanded around "zero orbit".
 # Define the Linear tracking method, and number of rows in the work matrix 
 # (equal to number of temporaries needed for a single particle)
 struct Linear end
+
 MAX_TEMPS(::Linear) = 1
+
+# For isbits tracking
+const LINEAR_ID = objectid(Linear())
+ID_TO_TM[LINEAR_ID] = Linear()
 
 module LinearTracking
 using ..GTPSA, ..BeamTracking, ..StaticArrays

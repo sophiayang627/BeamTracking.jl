@@ -22,17 +22,17 @@ function track!(bunch::Bunch, bl::Beamline; work=nothing)
   return bunch
 end
 
-function track!(bunch::Bunch, ele::LineElement; work=nothing)
+function track!(bunch::Bunch, ele; work=nothing)
   # Dispatch on the tracking method:
-  return track!(bunch, ele, ele.tracking_method; work=work)
+  return track!(bunch, ele, ele.tracking_method, work)
 end
 
 
 function track!(
   bunch::Bunch, 
   ele::LineElement, 
-  ::Linear; 
-  work=nothing
+  tm::Linear,
+  work=zeros(eltype(bunch.v), N_particle, MAX_TEMPS(tm))
 )
   # Unpack the line element
   ma = ele.AlignmentParams
@@ -45,16 +45,24 @@ function track!(
   # For some reason, inlining this is faster/zero allocs
   # copy-paste is slower and so is @noinline so I guess LLVM is 
   # doing some kind of constant propagation while inlining this?
-  return @inline _track_linear!(bunch, ma, bm, bp, L, Brho_ref; work=work)
+  return _track_linear!(bunch, ma, bm, bp, L, Brho_ref, work)
 end
 
+function _track_linear!(bunch, ma, bm, bp, L, Brho_ref, work)
+  v = soaview(bunch)
+  linear_universal!(nothing, v, work, bunch.Brho_0, calc_gamma(bunch.species, bunch.Brho_0), L, Brho_ref, bm, bp, ma)
+  return bunch
+end
+
+
+#=
 function _track_linear!(
   bunch::Bunch, 
   ma::Union{AlignmentParams,Nothing},
   bm::Union{BMultipoleParams,Nothing}, 
   bp::Union{BendParams,Nothing},
   L, 
-  Brho_ref;
+  Brho_ref,
   work=nothing # =zeros(eltype(bunch.v), get_N_particle(bunch), MAX_TEMPS(Linear())),
 ) 
   v = soaview(bunch)
@@ -113,3 +121,4 @@ function _track_linear!(
   #launch!(chain, v, work)
   return bunch
 end
+=#

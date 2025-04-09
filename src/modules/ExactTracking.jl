@@ -6,7 +6,12 @@ Exact tracking methods
 # Define the Exact tracking method, and number of columns in the work matrix 
 # (equal to number of temporaries needed for a single particle)
 struct Exact end
+
 MAX_TEMPS(::Exact) = 1
+
+# For isbits tracking
+const EXACT_ID = objectid(Exact())
+ID_TO_TM[EXACT_ID] = Exact()
 
 module ExactTracking
 using ..GTPSA, ..BeamTracking, ..StaticArrays

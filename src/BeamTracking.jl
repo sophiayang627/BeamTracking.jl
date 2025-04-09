@@ -19,8 +19,12 @@ include("utils.jl")
 include("kernel.jl")
 include("types.jl")
 
+# Stores the objectid of each tracking method to its type
+const ID_TO_TM = Dict{UInt, Any}()
+
 include("modules/ExactTracking.jl") #; TRACKING_METHOD(::ExactTracking) = Exact
 include("modules/LinearTracking.jl") #; TRACKING_METHOD(::LinearTracking) = Linear
+
 
 # Empty tracking method to be imported+implemented by package extensions
 function track! end

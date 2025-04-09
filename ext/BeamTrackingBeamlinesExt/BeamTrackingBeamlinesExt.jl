@@ -1,6 +1,7 @@
 module BeamTrackingBeamlinesExt
 using Beamlines, BeamTracking, GTPSA
-using BeamTracking: soaview, get_N_particle, MAX_TEMPS, calc_gamma, launch!
+using Beamlines: AbstractBitsParams, BitsBMultipoleParams, BitsLineElement, BitsBendParams, BitsAlignmentParams
+using BeamTracking: soaview, get_N_particle, MAX_TEMPS, calc_gamma, launch!, runkernel!
 import BeamTracking: track!, make_track_chain
 
 # Define my own custom tracking method
@@ -8,8 +9,9 @@ import BeamTracking: track!, make_track_chain
 struct SciBmadStandard end
 
 
+include("linearbits.jl")
+include("linear2.jl")
 
-include("linear.jl")
 
 
 end
