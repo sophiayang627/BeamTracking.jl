@@ -9,9 +9,7 @@ import BeamTracking: track!, make_track_chain
 struct SciBmadStandard end
 
 
-include("linearbits.jl")
-include("linear2.jl")
-
+include("linear.jl")
 
 
 end

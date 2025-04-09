@@ -18,3 +18,6 @@ N_particle = 10000
 
 b0 = Bunch(N_particle, mem=BeamTracking.SoA)
 @btime track!($b0, $bl)
+
+bitbl = Beamlines.tobits(bl)
+@btime track!($b0, $bitbl)
