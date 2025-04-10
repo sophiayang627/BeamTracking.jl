@@ -1,6 +1,7 @@
 isactive(p::AbstractParams) = true
 isactive(::Nothing) = false
-isactive(p::AbstractBitsParams) = p.isactive
+#isactive(p::BitsBMultipoleParams) = 
+#isactive
 
 function linear_universal!(
   i, 
