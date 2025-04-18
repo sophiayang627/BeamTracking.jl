@@ -17,6 +17,11 @@ function track!(
   return _track!(nothing, soaview(bunch), work, bunch, ele, ele.tracking_method)
 end
 
+# Indicies array instead of nothing
+# this could be used to actually mask alive particles, specify indicies
+# Would also allow you to do mix of outer and inner loop too, doing a sub-bunch of 
+# particles in parallel
+
 @inline function outer_track!(i, v, work, bunch, bl::Beamline)
   for j in 1:length(bl.line)
     @inbounds ele = bl.line[j]

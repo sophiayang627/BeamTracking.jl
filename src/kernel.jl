@@ -77,25 +77,25 @@ end
 # go through each element, each thread loops through each 
 # particle and does stuff with it
 
-# Call launch! (CPU likely)
+# Call launch!
 @inline runkernel!(f!::F, i::Nothing, v, work, args...) where {F} = launch!(f!, v, work, args...)
 
-# Call kernel directly (already inside launch!, GPU likely)
+# Call kernel directly
 @inline runkernel!(f!::F, i, v, work, args...) where {F} = f!(i, v, work, args...)
 
 
 #=
- 
-for t in Threads
-  for ele in lattice
-    # do stuff
-    if (space_charge)
-      # When you get to space charge kick:
-      for particle in particles
 
-      end
-    end
+for particle in particles
+  for ele in ring
+
   end
 end
 
+for ele in ring
+  # do a bunch pre pro
+  for particle in particle
+
+  end
+end
  =#
