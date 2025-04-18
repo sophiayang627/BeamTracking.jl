@@ -41,7 +41,7 @@ function linear_universal!(
     error("bend tracking not implemented yet")
   end
 
-  gamma_0 = calc_gamma(bunch.species, bunch.Brho_0)
+  gamma_0 = calc_gamma(bunch.species, bunch.Brho_ref)
 
   if !isactive(bmultipoleparams)
     runkernel!(LinearTracking.linear_drift!, i, v, work, L, L/gamma_0^2)
@@ -56,7 +56,7 @@ function linear_universal!(
       K1 /= L
     end
     if !bm1.normalized
-      K1 /= bunch.Brho_0
+      K1 /= bunch.Brho_ref
     end
 
     mx, my = LinearTracking.linear_quad_matrices(K1, L)

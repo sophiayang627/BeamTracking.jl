@@ -34,7 +34,7 @@ end
 
 
 function check_Brho(Brho_ref, bunch::Bunch)
-  if !isnan(Brho_ref) && !(Brho_ref ≈ bunch.Brho_0)
+  if !isnan(Brho_ref) && !(Brho_ref ≈ bunch.Brho_ref)
     @warn "The reference energy of the bunch does NOT equal the reference energy of the Beamline. 
     Normalized field strengths in tracking always use the reference energy of the bunch. "
   end
