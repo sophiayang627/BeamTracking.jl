@@ -9,10 +9,6 @@ struct Exact end
 
 MAX_TEMPS(::Exact) = 1
 
-# For isbits tracking
-const EXACT_ID = objectid(Exact())
-ID_TO_TM[EXACT_ID] = Exact()
-
 module ExactTracking
 using ..GTPSA, ..BeamTracking, ..StaticArrays
 using ..BeamTracking: XI, PXI, YI, PYI, ZI, PZI
@@ -41,17 +37,17 @@ end
 
 @inline function exact_drift!(i, v, work, L, tilde_m, gamsqr_0, beta_0)
   @assert size(work, 2) >= 1 && size(work, 1) == N_particle "Size of work matrix must be at least ($N_particle, 1) for exact_drift!"
-  @inbounds begin
-    @FastGTPSA! work[i,1] = sqrt((1.0 + v[i,PZI])^2 - (v[i,PXI]^2 + v[i,PYI]^2))  # P_s
-    @FastGTPSA! v[i,XI]   = v[i,XI] + v[i,PXI] * L / work[i,1]
-    @FastGTPSA! v[i,YI]   = v[i,YI] + v[i,PYI] * L / work[i,1]
-    @FastGTPSA! v[i,ZI]   = v[i,ZI] - ( (1.0 + v[i,PZI]) * L
-                              * ((v[i,PXI]^2 + v[i,PYI]^2) - v[i,PZI] * (2 + v[i,PZI]) / gamsqr_0)
-                              / ( beta_0 * sqrt((1 + v[i,PZI])^2 + tilde_m^2) * work[i,1]
-                                  * (beta_0 * sqrt((1 + v[i,PZI])^2 + tilde_m^2) + work[i,1])
-                                )
-                            )
-  end
+  @inbounds begin @FastGTPSA! begin
+    work[i,1] = sqrt((1.0 + v[i,PZI])^2 - (v[i,PXI]^2 + v[i,PYI]^2))  # P_s
+    v[i,XI]   = v[i,XI] + v[i,PXI] * L / work[i,1]
+    v[i,YI]   = v[i,YI] + v[i,PYI] * L / work[i,1]
+    v[i,ZI]   = v[i,ZI] - ( (1.0 + v[i,PZI]) * L
+                  * ((v[i,PXI]^2 + v[i,PYI]^2) - v[i,PZI] * (2 + v[i,PZI]) / gamsqr_0)
+                  / ( beta_0 * sqrt((1 + v[i,PZI])^2 + tilde_m^2) * work[i,1]
+                      * (beta_0 * sqrt((1 + v[i,PZI])^2 + tilde_m^2) + work[i,1])
+                    )
+                )
+  end end
   return v
 end
 

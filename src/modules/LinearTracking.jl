@@ -9,10 +9,6 @@ struct Linear end
 
 MAX_TEMPS(::Linear) = 1
 
-# For isbits tracking
-const LINEAR_ID = objectid(Linear())
-ID_TO_TM[LINEAR_ID] = Linear()
-
 module LinearTracking
 using ..GTPSA, ..BeamTracking, ..StaticArrays
 using ..BeamTracking: XI, PXI, YI, PYI, ZI, PZI
@@ -44,11 +40,11 @@ end
   @assert size(mx) == (2,2) "Size of matrix mx must be (2,2) for linear_coast_uncoupled!. Received $(size(mx))"
   @assert size(my) == (2,2) "Size of matrix my must be (2,2) for linear_coast_uncoupled!. Received $(size(my))"
   @assert isnothing(d) || length(d) == 4 "The dispersion vector d must be either `nothing` or of length 4 for linear_coast_uncoupled!. Received $d"
-  #=if !isnothing(t)
+  if !isnothing(t)
     @inbounds begin @FastGTPSA! begin
       v[i,ZI] += t[XI] * v[i,XI] + t[PXI] * v[i,PXI] + t[YI] * v[i,YI] + t[PYI] * v[i,PYI]
     end end
-  end=#
+  end
   @inbounds begin @FastGTPSA! begin
     work[i,1]= v[i,XI]
     v[i,XI]  = mx[1,1] * v[i,XI]   + mx[1,2] * v[i,PXI] 
@@ -58,14 +54,14 @@ end
     v[i,PYI] = my[2,1] * work[i,1] + my[2,2] * v[i,PYI]
     v[i,ZI] += r56 * v[i,PZI]
   end end
-  #=if !isnothing(d)
+  if !isnothing(d)
     @inbounds begin @FastGTPSA! begin
       v[i,XI]  += d[XI]  * v[i,PZI]
       v[i,PXI] += d[PXI] * v[i,PZI]
       v[i,YI]  += d[YI]  * v[i,PZI]
       v[i,PYI] += d[PYI] * v[i,PZI]
     end end
-  end=#
+  end
   return v
 end
 

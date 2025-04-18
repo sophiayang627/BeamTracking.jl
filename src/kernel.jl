@@ -72,8 +72,30 @@ ALWAYS be the following:
   return v
 end
 
+# collective effects
+# each threads corresponds to many particles
+# go through each element, each thread loops through each 
+# particle and does stuff with it
+
 # Call launch! (CPU likely)
 @inline runkernel!(f!::F, i::Nothing, v, work, args...) where {F} = launch!(f!, v, work, args...)
 
 # Call kernel directly (already inside launch!, GPU likely)
 @inline runkernel!(f!::F, i, v, work, args...) where {F} = f!(i, v, work, args...)
+
+
+#=
+ 
+for t in Threads
+  for ele in lattice
+    # do stuff
+    if (space_charge)
+      # When you get to space charge kick:
+      for particle in particles
+
+      end
+    end
+  end
+end
+
+ =#

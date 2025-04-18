@@ -18,21 +18,20 @@ function test_matrix(kernel, M_expected, args...; type_stable=true, no_allocs=tr
 
 
   n_temps = BeamTracking.MAX_TEMPS(parentmodule(kernel).TRACKING_METHOD())
-  v0 = transpose(@vars(d))
-  v = zero(v0)
+  v = transpose(@vars(d))
   work = zeros(eltype(v), 1, n_temps)
 
-  BeamTracking.launch!(kernel, v, v0, work, args...)
+  BeamTracking.launch!(kernel, v, work, args...)
 
   # 1) Correctness
   @test norm(GTPSA.jacobian(v)[1:6,1:6] - scalar.(M_expected)) < tol 
   # 2) Type stability
   if type_stable
-  @test_opt BeamTracking.launch!(kernel, v, v0, work, args...)
+  @test_opt BeamTracking.launch!(kernel, v, work, args...)
   end
   # 3) No Allocations
   if no_allocs
-  @test @ballocated(BeamTracking.launch!($kernel, $v, $v0, $work, $args...)) == 0 
+  @test @ballocated(BeamTracking.launch!($kernel, $v, $work, $args...)) == 0 
   end
 end
 
