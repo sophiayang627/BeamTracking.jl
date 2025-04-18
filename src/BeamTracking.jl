@@ -3,9 +3,7 @@ using GTPSA,
       ReferenceFrameRotations,
       StaticArrays, 
       SIMD,
-      VectorizationBase,
-      Polyester,
-      LoopVectorization
+      VectorizationBase
       
 import GTPSA: sincu, sinhcu
 import Base: setproperty!
