@@ -9,7 +9,7 @@ BenchmarkTools.DEFAULT_PARAMETERS.gctrial = false
 BenchmarkTools.DEFAULT_PARAMETERS.evals = 2
   
 # Soon we generalize this to test_map...
-function test_matrix(kernel, M_expected, args...; type_stable=true, no_allocs=true, tol=1e-14, GTPSA_order=1)
+function test_matrix(kernel, M_expected, args...; type_stable= VERSION >= v"1.11", no_allocs=true, tol=1e-14, GTPSA_order=1)
   if any(t->t isa TPS, args)
     d = GTPSA.getdesc(args[findfirst(t->t isa TPS, args)])
   else
