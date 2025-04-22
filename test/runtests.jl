@@ -1,6 +1,5 @@
 using Test,
       BeamTracking,
-      Distributions,
       JET,
       BenchmarkTools,
       GTPSA
@@ -312,3 +311,5 @@ end
           test_matrix(cb, 1, M_cb_expected, beta_gamma_ref=beta_gamma_ref, species=species)
     end
 #include("linear.jl")
+include("element_tests.jl")
+

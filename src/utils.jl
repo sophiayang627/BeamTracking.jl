@@ -83,7 +83,7 @@ DTA: Need to handle energy units other than ``\\mathrm{eV}``..
 """
 
 function brho(e_rest, beta_gamma, ne = 1)
-  return (sr_pc(e_rest, beta_gamma) / (ne * c_light))
+  return (sr_pc(e_rest, beta_gamma) / (ne * C_LIGHT))
 end
 ## If given ``E_\text{kin}`` instead of ``\beta\gamma``,
 ## use the following:
@@ -166,12 +166,4 @@ function sinhcu(z::Number)
     return sinh(z) / z
   end
 end
-
-# These will go in GTPSA 
-sincu(z::TPS) = sinc(z/pi)
-sinhcu(z::TPS) = sinhc(z/pi)
-sincu(z::GTPSA.TempTPS) = (GTPSA.div!(z,z,pi); return GTPSA.__t_sinc(z);)
-sinhcu(z::GTPSA.TempTPS) = (GTPSA.div!(z,z,pi); return GTPSA.__t_sinhc(z);)
-
-
 
